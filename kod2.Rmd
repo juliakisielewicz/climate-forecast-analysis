@@ -1,0 +1,271 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+SETTING WORKING DIRECTORY
+```{r}
+setwd("D:/AGH/INZ")
+```
+
+LOADING PACKAGES
+```{r}
+library(ncdf4)
+library(sf)
+library(zoo)
+library(chron)
+library(RColorBrewer)
+library(lattice)
+
+```
+
+SHAPEFILES
+```{r}
+#MALOPOLSKIE & PODKARPACKIE
+south <- st_read("data/Wojewodztwa/poludnie.shp")
+#Projected CRS: ETRS89 / Poland CS92
+
+south <- st_transform(south, crs = 4326)
+#Geodetic CRS:  WGS 84
+
+south <- st_geometry(south)
+south <- st_union(south)
+south
+#plot(south)
+
+#WIELKOPOLSKIE & KUJAWSKO-POMORSKIE
+north <- st_read("data/Wojewodztwa/polnoc.shp")
+#Projected CRS: ETRS89 / Poland CS92
+
+north <- st_transform(north, crs = 4326)
+#Geodetic CRS:  WGS 84
+
+north <- st_geometry(north)
+north <- st_union(north)
+north
+#plot(north)
+```
+
+##########################################################################################################################################
+
+TERRACLIMATE (OBSERVATIONAL DATA)
+
+Loading data
+```{r}
+ncin_real_ppt<-nc_open("data/real/agg_terraclimate_ppt_1958_CurrentYear_GLOBE.nc")
+ncin_real_tmax<-nc_open("data/real/poland/agg_terraclimate_tmax_1958_CurrentYear_GLOBE.nc")
+ncin_real_tmin<-nc_open("data/real/agg_terraclimate_tmin_1958_CurrentYear_GLOBE.nc")
+
+
+#ncin_real_tmax<-nc_open("data/cru_ts4.05.1901.2020.tmp.dat.nc")
+
+```
+
+# MAX TEMPERATURE
+
+Data details
+```{r}
+print(ncin_real_tmax)
+#tmax[lon,lat,time]
+#coordinate_system: WGS84,EPSG:4326
+
+ncatt_get(ncin_real_tmax, 0, "title")
+ncatt_get(ncin_real_tmax, 0, "institution")
+ncatt_get(ncin_real_tmax, 0, "source") # data source
+ncatt_get(ncin_real_tmax, 0, "references")
+ncatt_get(ncin_real_tmax, 0, "history")
+ncatt_get(ncin_real_tmax, 0, "Conventions")
+
+#Checking units
+ncatt_get(ncin_real_tmax,"lon","units") #degrees_east
+ncatt_get(ncin_real_tmax,"lat","units") #degrees_north
+ncatt_get(ncin_real_tmax,"time","units") #"days since 1900-01-01 00:00:00"
+ncatt_get(ncin_real_tmax,"tmax","units") #degC
+
+ncatt_get(ncin_real_tmax,"tmax","long_name") #air_temperature
+ncatt_get(ncin_real_tmax,"tmax","_FillValue") #-32768
+ncatt_get(ncin_real_tmax,"tmax","missing_value") #-32768
+
+
+
+```
+
+
+Extracting variables
+```{r}
+lon <- ncvar_get(ncin_real_tmax, "lon")
+lat <- ncvar_get(ncin_real_tmax, "lat")
+time <- ncvar_get(ncin_real_tmax, "time")
+
+dim(lon) #217
+dim(lat) #145
+dim(time) # 192 -> 16 years, 12 months each
+
+head(lon)
+head(lat)
+head(time)
+
+tmax_real_array <- ncvar_get(ncin_real_tmax, "tmax")
+head(tmax_real_array, n =10)
+
+#tmax_real_array<-ncvar_get(ncin_real_tmax,"tmax",start=c(1,1,7),count=c(dim(lon),dim(lat),1))
+
+
+
+#NA values
+which(tmax_real_array == NA)
+#integer(0) <- no need to modify 
+
+```
+
+
+Time units correction
+```{r}
+time_units <- ncatt_get(ncin_real_tmax,"time","units")
+time_units <- strsplit(time_units$value, " ")
+time_units <- strsplit(unlist(time_units)[3], "-")
+
+time_year <- as.integer(unlist(time_units)[1])
+time_month <- as.integer(unlist(time_units)[2])
+time_day <- as.integer(unlist(time_units)[3])
+
+time_real <- chron(time_real, origin = c(time_month, time_day, time_year))
+Sys.setlocale("LC_TIME", "C")
+time_real <- as.yearmon(time_real)
+
+head(time_real)
+tail(time_real)
+#time range: Jan 2006 - Dec 2021
+
+#extracting values only from July
+july <- seq(7, 12*16, by=12)
+july
+time_real_july <- time_real[july]
+time_real_july
+
+tmax_real_july <- tmax_real_array[,,july]
+
+summary(tmax_real_july)
+
+```
+
+Visualization
+```{r} 
+range(na.omit(as.numeric(tmax_real_array)))
+range(na.omit(as.numeric(lon)))
+range(na.omit(as.numeric(lat)))
+
+range_real_lon <- range(na.omit(as.numeric(lon)))[2] - range(na.omit(as.numeric(lon)))[1]
+range_real_lat <- range(na.omit(as.numeric(lat)))[2] - range(na.omit(as.numeric(lat)))[1]
+
+
+grid <- expand.grid(lon=lon, lat=lat)
+head(grid)
+cutpts <- c(15, 19, 21, 23, 25, 27, 29, 31, 33)
+cutpts
+levelplot(tmax_real_july[,,1] ~ lon * lat, data=grid, at=cutpts, cuts=11, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=0.5)
+
+```
+
+##################################################################################################################################################
+
+FORECAST
+
+Loading data
+```{r}
+ncin_fore_ppt<-nc_open("data/forecast/CHELSAcmip5ts_pr_ACCESS1-3_rcp45_2006-2029_V1.1.nc")
+ncin_fore_tmax<-nc_open("data/forecast/CHELSAcmip5ts_tasmax_ACCESS1-3_rcp45_2006-2029_V1.1.nc")
+ncin_fore_tmin<-nc_open("data/forecast/CHELSAcmip5ts_tasmin_ACCESS1-3_rcp45_2006-2029_V1.1.nc")
+
+```
+
+# MAX TEMPERATURE
+
+Data details
+```{r}
+print(ncin_fore_tmax)
+#tmax[lon,lat,time]
+#coordinate_system: WGS84,EPSG:4326
+
+ncatt_get(ncin_fore_tmax, 0, "Title")
+ncatt_get(ncin_fore_tmax, 0, "References")
+ncatt_get(ncin_fore_tmax, 0, "history")
+ncatt_get(ncin_fore_tmax, 0, "Conventions")
+
+#Checking units
+ncatt_get(ncin_fore_tmax,"longitude","units") #degrees_east
+ncatt_get(ncin_fore_tmax,"latitude","units") #degrees_north
+ncatt_get(ncin_fore_tmax,"time","units") # "days since 2006-1-15 00:00:00"
+ncatt_get(ncin_fore_tmax,"air_temperature","units") #K
+
+ncatt_get(ncin_fore_tmax,"air_temperature","long_name") #air_temperature
+ncatt_get(ncin_fore_tmax,"air_temperature","_FillValue") #-99999
+ncatt_get(ncin_fore_tmax,"air_temperature","missing_value") #-99999
+
+
+#NA values
+#which(ncvar_get(ncin_fore_tmax,"air_temperature") > 30)
+#integer(0) <- no need to modify 
+
+```
+
+
+
+Extracting variables
+```{r}
+lon_fore <- ncvar_get(ncin_fore_tmax, "longitude")
+lat_fore <- ncvar_get(ncin_fore_tmax, "latitude")
+time_fore <- ncvar_get(ncin_fore_tmax, "time")
+
+dim(lon_fore) #8017
+dim(lat_fore) #3875
+dim(time_fore) # 288 -> 24 years, 12 months each
+
+head(lon_fore)
+head(lat_fore)
+head(time_fore)
+
+#tmax_array <- ncvar_get(ncin_real_tmax, "tmax")
+#head(tmax_array)
+
+#NA values
+#which(tmax_array == -32768)
+#integer(0) <- no need to modify 
+
+```
+
+
+Time units correction
+```{r}
+time_units <- ncatt_get(ncin_fore_tmax,"time","units")
+time_units <- strsplit(time_units$value, " ")
+time_units <- strsplit(unlist(time_units)[3], "-")
+
+time_year <- as.integer(unlist(time_units)[1])
+time_month <- as.integer(unlist(time_units)[2])
+time_day <- as.integer(unlist(time_units)[3])
+
+time_fore <- chron(time_fore, origin = c(time_month, time_day, time_year))
+Sys.setlocale("LC_TIME", "C")
+time_fore <- as.yearmon(time_fore)
+
+head(time_fore)
+tail(time_fore)
+#time range: Jan 2006 - Dec 2029
+
+#limit to range Jan 2006 - Dec 2021
+time_fore <- time_fore[1:192]
+
+#extracting values only from July
+july <- seq(7, 12*16, by=12)
+july
+time_fore_july <- time_fore[july]
+time_fore_july
+
+length(time_fore_july) == length(time_july) #TRUE
+
+#tmax_fore_july <- tmax_array[,,july]
+
+#summary(tmax_july)
+
+```
+
