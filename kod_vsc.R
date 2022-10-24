@@ -194,17 +194,38 @@ cutpts
 levelplot(cru_all_tmp ~ lon_real * lat_real, data=grid, at=cutpts, cuts=10, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=0.5)
 
 
+library(ncdf4)
+library(chron)
+library(lattice)
+library(RColorBrewer)
+library(zoo)
+library(animation)
+#library(raster)
 
+setwd("D:/AGH/INZ")
 
-ncin < -nc_open("data/real/poland/agg_terraclimate_tmax_1958_CurrentYear_GLOBE.nc")
-lon <- ncvar_get(ncin,"lon")
-lat <- ncvar_get(ncin,"lat")
-cru_all_tmp<-ncvar_get(ncin,"tmax",start=c(1,1,7),count=c(dim(lon),dim(lat),1))
-#tmax_tmp <- ncvar_get(ncin, "tmp")
+ncin_real <- nc_open("data/real/poland/agg_terraclimate_tmax_1958_CurrentYear_GLOBE.nc")
+lon <- ncvar_get(ncin_real,"lon")
+lat <- ncvar_get(ncin_real,"lat")
+tmax_real <- ncvar_get(ncin_real,"tmax",start=c(1,1,7),count=c(dim(lon),dim(lat),1))
 
-grid <- expand.grid(lon=lon, lat=lat)
-head(grid)
+grid_real <- expand.grid(lon=lon, lat=lat)
+head(grid_real)
 cutpts <- c(15, 19, 21, 23, 25, 27, 29, 31, 33)
 cutpts
-levelplot(cru_all_tmp ~ lon * lat, data=grid, at=cutpts, cuts=10, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=0.5)
+levelplot(tmax_real ~ lon * lat, data=grid_real, at=cutpts, cuts=10, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=0.5)
+
+
+
+ncin_2 <- nc_open("data/real/poland/agg_terraclimate_tmax_1958_CurrentYear_GLOBE.nc")
+lon_2 <- ncvar_get(ncin_2,"lon")
+lat_2 <- ncvar_get(ncin_2,"lat")
+cru_all_tmp_2<-ncvar_get(ncin_2,"tmax",start=c(1,1,7),count=c(dim(lon_2),dim(lat_2),1))
+#tmax_tmp <- ncvar_get(ncin, "tmp")
+
+grid_2 <- expand.grid(lon=lon_2, lat=lat_2)
+head(grid_2)
+cutpts_2 <- c(15, 19, 21, 23, 25, 27, 29, 31, 33)
+cutpts_2
+levelplot(cru_all_tmp_2 ~ lon_2 * lat_2, data=grid_2, at=cutpts_2, cuts=10, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=0.5)
 /*

@@ -15,10 +15,11 @@ library(zoo)
 library(chron)
 library(RColorBrewer)
 library(lattice)
-
+library(weathermetrics)
 ```
 
-SHAPEFILES
+# SHAPEFILES
+
 ```{r}
 #MALOPOLSKIE & PODKARPACKIE
 south <- st_read("data/Wojewodztwa/poludnie.shp")
@@ -47,12 +48,12 @@ north
 
 ##########################################################################################################################################
 
-TERRACLIMATE (OBSERVATIONAL DATA)
+# TERRACLIMATE (OBSERVATIONAL DATA)
 
 Loading data
 ```{r}
 ncin_real_ppt<-nc_open("data/real/agg_terraclimate_ppt_1958_CurrentYear_GLOBE.nc")
-ncin_real_tmax<-nc_open("data/real/poland/agg_terraclimate_tmax_1958_CurrentYear_GLOBE.nc")
+ncin_real_tmax<-nc_open("data/real/agg_terraclimate_tmax_1958_CurrentYear_GLOBE.nc")
 ncin_real_tmin<-nc_open("data/real/agg_terraclimate_tmin_1958_CurrentYear_GLOBE.nc")
 
 
@@ -60,7 +61,7 @@ ncin_real_tmin<-nc_open("data/real/agg_terraclimate_tmin_1958_CurrentYear_GLOBE.
 
 ```
 
-# MAX TEMPERATURE
+## MAX TEMPERATURE
 
 Data details
 ```{r}
@@ -105,7 +106,7 @@ head(lat)
 head(time)
 
 tmax_real_array <- ncvar_get(ncin_real_tmax, "tmax")
-head(tmax_real_array, n =10)
+#head(tmax_real_array, n =1)
 
 #tmax_real_array<-ncvar_get(ncin_real_tmax,"tmax",start=c(1,1,7),count=c(dim(lon),dim(lat),1))
 
@@ -128,18 +129,18 @@ time_year <- as.integer(unlist(time_units)[1])
 time_month <- as.integer(unlist(time_units)[2])
 time_day <- as.integer(unlist(time_units)[3])
 
-time_real <- chron(time_real, origin = c(time_month, time_day, time_year))
+time <- chron(time, origin = c(time_month, time_day, time_year))
 Sys.setlocale("LC_TIME", "C")
-time_real <- as.yearmon(time_real)
+time <- as.yearmon(time)
 
-head(time_real)
-tail(time_real)
+head(time)
+tail(time)
 #time range: Jan 2006 - Dec 2021
 
 #extracting values only from July
 july <- seq(7, 12*16, by=12)
 july
-time_real_july <- time_real[july]
+time_real_july <- time[july]
 time_real_july
 
 tmax_real_july <- tmax_real_array[,,july]
@@ -160,15 +161,15 @@ range_real_lat <- range(na.omit(as.numeric(lat)))[2] - range(na.omit(as.numeric(
 
 grid <- expand.grid(lon=lon, lat=lat)
 head(grid)
-cutpts <- c(15, 19, 21, 23, 25, 27, 29, 31, 33)
+cutpts <- c(15, 19, 21, 23, 25, 27, 29, 31, 33, 36)
 cutpts
-levelplot(tmax_real_july[,,1] ~ lon * lat, data=grid, at=cutpts, cuts=11, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=0.5)
+levelplot(tmax_real_july[,,1] ~ lon * lat, data=grid, at=cutpts, cuts=11, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_real_lat/range_real_lon)
 
 ```
 
 ##################################################################################################################################################
 
-FORECAST
+# FORECAST
 
 Loading data
 ```{r}
@@ -212,17 +213,17 @@ ncatt_get(ncin_fore_tmax,"air_temperature","missing_value") #-99999
 
 Extracting variables
 ```{r}
-lon_fore <- ncvar_get(ncin_fore_tmax, "longitude")
-lat_fore <- ncvar_get(ncin_fore_tmax, "latitude")
-time_fore <- ncvar_get(ncin_fore_tmax, "time")
+lon <- ncvar_get(ncin_fore_tmax, "longitude")
+lat <- ncvar_get(ncin_fore_tmax, "latitude")
+time <- ncvar_get(ncin_fore_tmax, "time")
 
-dim(lon_fore) #8017
-dim(lat_fore) #3875
-dim(time_fore) # 288 -> 24 years, 12 months each
+dim(lon) #8017
+dim(lat) #3875
+dim(time) # 288 -> 24 years, 12 months each
 
-head(lon_fore)
-head(lat_fore)
-head(time_fore)
+head(lon)
+head(lat)
+head(time)
 
 #tmax_array <- ncvar_get(ncin_real_tmax, "tmax")
 #head(tmax_array)
@@ -244,28 +245,85 @@ time_year <- as.integer(unlist(time_units)[1])
 time_month <- as.integer(unlist(time_units)[2])
 time_day <- as.integer(unlist(time_units)[3])
 
-time_fore <- chron(time_fore, origin = c(time_month, time_day, time_year))
+time <- chron(time, origin = c(time_month, time_day, time_year))
 Sys.setlocale("LC_TIME", "C")
-time_fore <- as.yearmon(time_fore)
+time <- as.yearmon(time)
 
-head(time_fore)
-tail(time_fore)
+head(time)
+tail(time)
 #time range: Jan 2006 - Dec 2029
 
 #limit to range Jan 2006 - Dec 2021
-time_fore <- time_fore[1:192]
-
+time <- time[1:192]
+which(time == tail(time, n=1))
 #extracting values only from July
 july <- seq(7, 12*16, by=12)
 july
-time_fore_july <- time_fore[july]
+time_fore_july <- time[july]
 time_fore_july
 
-length(time_fore_july) == length(time_july) #TRUE
+length(time_fore_july) == length(time_real_july) #TRUE
 
 #tmax_fore_july <- tmax_array[,,july]
 
 #summary(tmax_july)
+
+```
+
+```{r}
+print(ncin_real_tmax)
+
+#LATITUDE SIE ZMNIEJSZA
+
+lat_min <- (as.numeric(ncatt_get(ncin_real_tmax, 0,"geospatial_lat_min")))[2]
+lat_max <- (as.numeric(ncatt_get(ncin_real_tmax, 0,"geospatial_lat_max")))[2]
+lon_min <- (as.numeric(ncatt_get(ncin_real_tmax, 0,"geospatial_lon_min")))[2]
+lon_max <- (as.numeric(ncatt_get(ncin_real_tmax, 0,"geospatial_lon_max")))[2]
+
+lon_start <- which(abs(lon - lon_min) < 0.05)[1]
+lon_end <- which(abs(lon - lon_max) < 0.05)[2]
+lat_end <- which(abs(lat - lat_min) < 0.05)[2]
+lat_start <- which(abs(lat - lat_max) < 0.05)[1]
+
+lat[lat_end]
+
+lon_count <- lon_end - lon_start + 1
+lat_count <- lat_end - lat_start + 1
+
+lon <- lon[lon_start:lon_end]
+lat <- lat[lat_start:lat_end]
+
+
+tmax_fore_array <- ncvar_get(ncin_fore_tmax,"air_temperature",start=c(lon_start,lat_start,1),count=c(lon_count,lat_count,192))
+
+tmax_fore_july <- tmax_fore_array[,,july]
+
+summary(tmax_fore_july)
+```
+
+Kelvin to Celsius convertion
+```{r}
+tmax_fore_july <- kelvin.to.celsius(tmax_fore_july, round = 2)
+
+range(na.omit(as.numeric(tmax_fore_july)))
+
+```
+
+Visualization
+```{r} 
+range(na.omit(as.numeric(tmax_fore_july)))
+range(na.omit(as.numeric(lon)))
+range(na.omit(as.numeric(lat)))
+
+range_fore_lon <- range(na.omit(as.numeric(lon)))[2] - range(na.omit(as.numeric(lon)))[1]
+range_fore_lat <- range(na.omit(as.numeric(lat)))[2] - range(na.omit(as.numeric(lat)))[1]
+
+
+grid <- expand.grid(lon=lon, lat=lat)
+head(grid)
+cutpts <- c(15, 19, 21, 23, 25, 27, 29, 31, 33, 36)
+cutpts
+levelplot(tmax_fore_july[,,1] ~ lon * lat, data=grid, at=cutpts, cuts=11, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_fore_lat/range_fore_lon)
 
 ```
 
