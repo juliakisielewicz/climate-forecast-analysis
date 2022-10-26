@@ -189,10 +189,25 @@ lon_real_tmin <- ncvar_get(ncin_real_tmin, "lon")
 lat_real_tmin <- ncvar_get(ncin_real_tmin, "lat")
 time_real_tmin <- ncvar_get(ncin_real_tmin, "time")
 
+time_units <- ncatt_get(ncin_real_tmin,"time","units")
+time_units <- strsplit(time_units$value, " ")
+time_units <- strsplit(unlist(time_units)[3], "-")
+
+time_year <- as.integer(unlist(time_units)[1])
+time_month <- as.integer(unlist(time_units)[2])
+time_day <- as.integer(unlist(time_units)[3])
+
+time_real_tmin <- chron(time_real_tmin, origin = c(time_month, time_day, time_year))
+Sys.setlocale("LC_TIME", "C")
+time_real_tmin <- as.yearmon(time_real_tmin)
+
+head(time_real_tmin)
+tail(time_real_tmin)
+
 #checking if new variables are necessary
-length(lon_real == lon_real_tmin) == length(lon_real_tmin) #TRUE
-length(lat_real == lat_real_tmin) == length(lat_real_tmin) #TRUE
-length(time_real == time_real_tmin) == length(time_real_tmin) #TRUE
+which((lon_real == lon_real_tmin) == FALSE) #0
+which((lat_real == lat_real_tmin) == FALSE) #0
+which((time_real == time_real_tmin) == FALSE) #0
 #deleting unnecessary variables
 rm(lon_real_tmin, lat_real_tmin, time_real_tmin)
 
@@ -256,10 +271,25 @@ lon_real_ppt <- ncvar_get(ncin_real_ppt, "lon")
 lat_real_ppt <- ncvar_get(ncin_real_ppt, "lat")
 time_real_ppt <- ncvar_get(ncin_real_ppt, "time")
 
+time_units <- ncatt_get(ncin_real_ppt,"time","units")
+time_units <- strsplit(time_units$value, " ")
+time_units <- strsplit(unlist(time_units)[3], "-")
+
+time_year <- as.integer(unlist(time_units)[1])
+time_month <- as.integer(unlist(time_units)[2])
+time_day <- as.integer(unlist(time_units)[3])
+
+time_real_ppt <- chron(time_real_ppt, origin = c(time_month, time_day, time_year))
+Sys.setlocale("LC_TIME", "C")
+time_real_ppt <- as.yearmon(time_real_ppt)
+
+head(time_real_ppt)
+tail(time_real_ppt)
+
 #checking if new variables are necessary
-length(lon_real == lon_real_ppt) == length(lon_real_ppt) #TRUE
-length(lat_real == lat_real_ppt) == length(lat_real_ppt) #TRUE
-length(time_real == time_real_ppt) == length(time_real_ppt) #TRUE
+which((lon_real == lon_real_ppt) == FALSE) #0
+which((lat_real == lat_real_ppt) == FALSE) #0
+which((time_real == time_real_ppt) == FALSE) #0
 #deleting unnecessary variables
 rm(lon_real_ppt, lat_real_ppt, time_real_ppt)
 

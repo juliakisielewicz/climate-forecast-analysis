@@ -204,6 +204,26 @@ time_fore_tmin <- ncvar_get(ncin_fore_tmin, "time")
 
 #clipping data (time)
 time_fore_tmin <- time_fore_tmin[1:192]
+head(time_fore_tmin)
+
+time_units <- ncatt_get(ncin_fore_tmin,"time","units")
+time_units <- strsplit(time_units$value, " ")
+time_units <- strsplit(unlist(time_units)[3], "-")
+
+time_year <- as.integer(unlist(time_units)[1])
+time_month <- as.integer(unlist(time_units)[2])
+time_day <- as.integer(unlist(time_units)[3])
+
+time_fore_tmin <- chron(time_fore_tmin, origin = c(time_month, time_day, time_year))
+Sys.setlocale("LC_TIME", "C")
+time_fore_tmin <- as.yearmon(time_fore_tmin)
+
+head(time_fore_tmin)
+tail(time_fore_tmin)
+#time range: Jan 2006 - Dec 2029
+
+#limit to range Jan 2006 - Dec 2021
+time_fore_tmin <- time_fore_tmin[1:192]
 
 #clipping data (area)
 lat_fore_min <- (as.numeric(ncatt_get(ncin_real_tmin, 0,"geospatial_lat_min")))[2]
@@ -225,9 +245,9 @@ lon_fore_tmin <- lon_fore_tmin[lon_fore_start:lon_fore_end]
 lat_fore_tmin <- lat_fore_tmin[lat_fore_start:lat_fore_end]
 
 #checking if new variables are necessary
-length(lon_fore == lon_fore_tmin) == length(lon_fore_tmin) #TRUE
-length(lat_fore == lat_fore_tmin) == length(lat_fore_tmin) #TRUE
-length(time_fore == time_fore_tmin) == length(time_fore_tmin) #TRUE
+which((lon_fore == lon_fore_tmin) == FALSE) #0
+which((lat_fore == lat_fore_tmin) == FALSE) #0
+which((time_fore == time_fore_tmin) == FALSE) #0
 #deleting unnecessary variables
 rm(lon_fore_tmin, lat_fore_tmin, time_fore_tmin)
 
@@ -271,7 +291,6 @@ levelplot(tmin_fore_array[,,7] ~ lon * lat, data=grid_fore, at=cutpts, cuts=11, 
 
 # PRECIPITATION
 
-
 Data details
 ```{r}
 print(ncin_fore_ppt)
@@ -290,4 +309,70 @@ ncatt_get(ncin_fore_ppt,"precipitation_flux","_FillValue") #-99999
 ncatt_get(ncin_fore_ppt,"precipitation_flux","missing_value") #-99999
 
 
+```
+
+Extracting variables
+```{r}
+lon_fore_ppt <- ncvar_get(ncin_fore_ppt, "longitude")
+lat_fore_ppt <- ncvar_get(ncin_fore_ppt, "latitude")
+time_fore_ppt <- ncvar_get(ncin_fore_ppt, "time")
+
+```
+
+Time units correction
+```{r}
+time_units <- ncatt_get(ncin_fore_ppt,"time","units")
+time_units <- strsplit(time_units$value, " ")
+time_units <- strsplit(unlist(time_units)[3], "-")
+
+time_year <- as.integer(unlist(time_units)[1])
+time_month <- as.integer(unlist(time_units)[2])
+time_day <- as.integer(unlist(time_units)[3])
+
+time_fore_ppt <- chron(time_fore_ppt, origin = c(time_month, time_day, time_year))
+Sys.setlocale("LC_TIME", "C")
+time_fore_ppt <- as.yearmon(time_fore_ppt)
+
+head(time_fore_ppt)
+tail(time_fore_ppt)
+#time range: Jan 2006 - Dec 2029
+
+head(time_fore)
+tail(time_fore)
+#limit to range Jan 2006 - Dec 2021
+time_fore_ppt <- time_fore_ppt[1:192]
+
+
+
+
+#clipping data (area)
+lat_fore_min <- (as.numeric(ncatt_get(ncin_real_ppt, 0,"geospatial_lat_min")))[2]
+lat_fore_max <- (as.numeric(ncatt_get(ncin_real_ppt, 0,"geospatial_lat_max")))[2]
+lon_fore_min <- (as.numeric(ncatt_get(ncin_real_ppt, 0,"geospatial_lon_min")))[2]
+lon_fore_max <- (as.numeric(ncatt_get(ncin_real_ppt, 0,"geospatial_lon_max")))[2]
+
+lon_fore_start <- which(abs(lon_fore_ppt - lon_fore_min) < 0.05)[1]
+lon_fore_end <- which(abs(lon_fore_ppt - lon_fore_max) < 0.05)[2]
+lat_fore_end <- which(abs(lat_fore_ppt - lat_fore_min) < 0.05)[2]
+lat_fore_start <- which(abs(lat_fore_ppt - lat_fore_max) < 0.05)[1]
+
+lat_fore_ppt[lat_fore_end]
+
+lon_fore_count <- lon_fore_end - lon_fore_start + 1
+lat_fore_count <- lat_fore_end - lat_fore_start + 1
+
+lon_fore_ppt <- lon_fore_ppt[lon_fore_start:lon_fore_end]
+lat_fore_ppt <- lat_fore_ppt[lat_fore_start:lat_fore_end]
+
+#checking if new variables are necessary
+which((lon_fore == lon_fore_ppt) == FALSE) #0
+which((lat_fore == lat_fore_ppt) == FALSE) #0
+which((time_fore == time_fore_ppt) == FALSE) #0
+#deleting unnecessary variables
+rm(lon_fore_ppt, lat_fore_ppt, time_fore_ppt)
+
+```
+
+
+```{r}
 ```
