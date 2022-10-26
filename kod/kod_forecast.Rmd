@@ -19,6 +19,7 @@ library(chron)
 library(RColorBrewer)
 library(lattice)
 library(weathermetrics)
+library(lubridate)
 ```
 
 ##################################################################################################################################################
@@ -319,7 +320,7 @@ time_fore_ppt <- ncvar_get(ncin_fore_ppt, "time")
 
 ```
 
-Time units correction
+
 ```{r}
 time_units <- ncatt_get(ncin_fore_ppt,"time","units")
 time_units <- strsplit(time_units$value, " ")
@@ -371,7 +372,60 @@ which((time_fore == time_fore_ppt) == FALSE) #0
 #deleting unnecessary variables
 rm(lon_fore_ppt, lat_fore_ppt, time_fore_ppt)
 
+
+ppt_fore_array <- ncvar_get(ncin_fore_ppt,"precipitation_flux",start=c(lon_fore_start,lat_fore_start,1),count=c(lon_fore_count,lat_fore_count,length(time_fore)))
+
+
+#NA values
+which(ppt_fore_array == -99999)
+#integer(0) <- no need to modify
 ```
+
+
+kg m-2 s-1 to mm convertion
+```{r}
+sec_per_day <- 86400
+
+for (i in 1 : length(time_fore)) {
+    ppt_fore_array[,,i] <- ppt_fore_array[,,i] * sec_per_day * days_in_month(time_fore[i])
+}
+
+
+summary(ppt_fore_array)
+summary(ppt_real_array)
+```
+
+
+
+
+
+
+
+
+
+
+
+Visualization
+```{r} 
+range(na.omit(as.numeric(tmin_fore_array)))
+range(na.omit(as.numeric(lon_fore)))
+range(na.omit(as.numeric(lat_fore)))
+
+
+cutpts <- c(4, 6, 8, 10, 12, 14, 16, 18, 20, 22)
+cutpts
+
+lon<-lon_fore
+lat<-lat_fore
+levelplot(tmin_fore_array[,,7] ~ lon * lat, data=grid_fore, at=cutpts, cuts=11, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_fore_lat/range_fore_lon)
+
+```
+
+
+
+
+
+
 
 
 ```{r}
