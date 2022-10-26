@@ -1,0 +1,51 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+SETTING WORKING DIRECTORY
+```{r}
+setwd("D:/AGH/INZ/data")
+```
+
+LOADING PACKAGES
+```{r}
+library(ncdf4)
+library(sf)
+library(zoo)
+library(chron)
+library(RColorBrewer)
+library(lattice)
+library(weathermetrics)
+```
+
+# SHAPEFILES
+
+```{r}
+#MALOPOLSKIE & PODKARPACKIE
+south <- st_read("Wojewodztwa/poludnie.shp")
+#Projected CRS: ETRS89 / Poland CS92
+
+south <- st_transform(south, crs = 4326)
+#Geodetic CRS:  WGS 84
+
+south <- st_geometry(south)
+south <- st_union(south)
+south
+#plot(south)
+
+#WIELKOPOLSKIE & KUJAWSKO-POMORSKIE
+north <- st_read("Wojewodztwa/polnoc.shp")
+#Projected CRS: ETRS89 / Poland CS92
+
+north <- st_transform(north, crs = 4326)
+#Geodetic CRS:  WGS 84
+
+north <- st_geometry(north)
+north <- st_union(north)
+north
+#plot(north)
+```
+
+
+```{r}
+```
