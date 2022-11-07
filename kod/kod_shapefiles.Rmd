@@ -36,7 +36,7 @@ south
 #WIELKOPOLSKIE & KUJAWSKO-POMORSKIE
 north <- st_read("Wojewodztwa/polnoc.shp")
 #Projected CRS: ETRS89 / Poland CS92
-
+  
 north <- st_transform(north, crs = 4326)
 #Geodetic CRS:  WGS 84
 
@@ -44,6 +44,9 @@ north <- st_geometry(north)
 north <- st_union(north)
 north
 #plot(north)
+
+
+both <- st_union(south, north)
 ```
 
 

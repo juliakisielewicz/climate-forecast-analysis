@@ -229,3 +229,108 @@ cutpts_2 <- c(15, 19, 21, 23, 25, 27, 29, 31, 33)
 cutpts_2
 levelplot(cru_all_tmp_2 ~ lon_2 * lat_2, data=grid_2, at=cutpts_2, cuts=10, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=0.5)
 /*
+
+
+
+
+
+
+
+
+
+
+
+
+
+ncin_real_ppt<-nc_open("real/agg_terraclimate_ppt_1958_CurrentYear_GLOBE.nc")
+ncin_real_tmax<-nc_open("real/agg_terraclimate_tmax_1958_CurrentYear_GLOBE.nc")
+ncin_real_tmin<-nc_open("real/agg_terraclimate_tmin_1958_CurrentYear_GLOBE.nc")
+
+
+ncin<-ncin_real_tmax
+
+lon <- ncvar_get(ncin,"lon")
+nlon <- dim(lon)
+head(lon)
+
+#to samo dla szerokooci 
+lat <- ncvar_get(ncin,"lat")
+nlat <- dim(lat)
+head(lat)
+time <- ncvar_get(ncin,"time")
+time
+tunits <- ncatt_get(ncin,"time","units")
+nt <- dim(time)
+nt
+tustr <- strsplit(tunits$value, " ")
+tdstr <- strsplit(unlist(tustr)[3], "-")
+tmonth <- as.integer(unlist(tdstr)[2])
+tday <- as.integer(unlist(tdstr)[3])
+tyear <- as.integer(unlist(tdstr)[1])
+time_ch<-chron(time,origin=c(tmonth, tday,tyear))
+
+time_ch
+#widaa ?e odczyt jest zawsze przypisany do 16 dnia miesi1ca wiec t1 informacje mo?na pomin1c w wektorze
+Sys.setlocale("LC_TIME", "C")
+time_m_y<-as.yearmon(time_ch)
+
+#format daty miesiac rok: 
+time_m_y
+
+m <- 1
+len<-length(time_m_y)
+time_m_y[m]
+variable_name<-"air_temperature"
+tmax <- ncvar_get(ncin_real_tmax, "tmax")
+tmin <- ncvar_get(ncin_real_tmin, "tmin")
+ppt <- ncvar_get(ncin_real_ppt, "ppt")
+
+d <- dim(tmax)
+dim(tmin)
+PET_array <- array(rep(NA, prod(d)), dim=d)
+
+
+for (i in 1:d[1]){
+	for (j in 1:d[2]){
+		tmp_min<-tmin[i,j,]
+		tmp_max<-tmax[i,j,]
+		print(i)
+		PET_array[i,j,]<-hargreaves(tmp_min,tmp_max,lat=lat[j])
+	}
+}
+
+grid_pet <- expand.grid(lon=lon, lat=lat)
+grid_pet$z<-as.numeric(PET_array[,,7])
+
+#prosta mapa
+levelplot(z ~ lon * lat,data=grid_pet)
+
+SPEI<- array(rep(NA, prod(d)), dim=d)
+
+for (i in 1:d[1]){
+	for (j in 1:d[2]){
+		print(i)
+		a<-as.vector(spei( as.numeric(ppt[i,j,])-as.numeric(PET_array[i,j,])  ,6)) # ostatni parametr -> liczba miesi�cy
+		SPEI[i,j,]<-as.vector(a$fitted)
+		#BAL[i,j,]<-as.numeric(prec[i,j,])-as.numeric(PET[i,j,]) 
+		
+	}
+}
+
+m<-7
+
+grid_spei <- expand.grid(lon=lon, lat=lat)
+grid_spei$z<-as.numeric(SPEI[,,m])
+
+#prosta mapa
+levelplot(z ~ lon * lat, data=grid_spei)
+
+spei_r_WGS<-rasterFromXYZ(grid_spei,crs=4326)
+
+
+pal <- colorRampPalette(c("red","blue"))
+cuts<-seq(-3,3,0.5)
+plot(spei_r_WGS,main=time_m_y[7],col=pal(13),breaks=cuts)
+plot(both,add=TRUE,lwd=2)
+
+

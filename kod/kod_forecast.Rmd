@@ -158,7 +158,7 @@ summary(tmax_real_array)
 
 Visualization
 ```{r} 
-range(na.omit(as.numeric(tmax_fore_array)))
+range(na.omit(as.numeric(tmax_fore_array[,,7])))
 range(na.omit(as.numeric(lon_fore)))
 range(na.omit(as.numeric(lat_fore)))
 
@@ -166,13 +166,14 @@ range_fore_lon <- range(na.omit(as.numeric(lon_fore)))[2] - range(na.omit(as.num
 range_fore_lat <- range(na.omit(as.numeric(lat_fore)))[2] - range(na.omit(as.numeric(lat_fore)))[1]
 
 grid_fore <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_fore$z<-as.numeric(tmax_fore_array[,,7])
+
 head(grid_fore)
 cutpts <- c(15, 19, 21, 23, 25, 27, 29, 31, 33, 36)
 cutpts
+cuts<-seq(14,36,2)
 
-lon<-lon_fore
-lat<-lat_fore
-levelplot(tmax_fore_array[,,7] ~ lon * lat, data=grid_fore, at=cutpts, cuts=11, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_fore_lat/range_fore_lon)
+levelplot(z ~ lon * lat, data=grid_fore, at=cuts, pretty=T, col.regions=(rev(brewer.pal(12,"RdBu"))),aspect=range_fore_lat/range_fore_lon, main = "Forecasted maximum temperature - July 2006")
 
 ```
 
@@ -421,7 +422,68 @@ levelplot(tmin_fore_array[,,7] ~ lon * lat, data=grid_fore, at=cutpts, cuts=11, 
 
 ```
 
+PET
+```{r}
+tmax_fore_dim <- dim(tmax_fore_array)
+PET_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 
+for (i in 1 : tmax_fore_dim[1])
+{
+    for (j in 1 : tmax_fore_dim[2])
+    {
+        print(i)
+        PET_fore[i,j,] <- hargreaves(tmin_fore_array[i,j,], tmax_fore_array[i,j,], lat=lat_fore[j])
+    }
+}
+
+
+range(na.omit(as.numeric(PET_fore[,,7])))
+median(PET_fore[,,7])
+grid_fore_pet <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_fore_pet$z<-as.numeric(PET_fore[,,7])
+#levelplot(z ~ lon * lat,data=grid_real_pet)
+cuts<-c(90, seq(130,210,20))
+
+levelplot(z ~ lon * lat, data=grid_fore_pet, at=cuts, pretty=T, col.regions=(rev(brewer.pal(6,"RdBu"))),aspect=range_fore_lat/range_fore_lon, main = "PET - July 2006")
+
+```
+
+SPEI
+```{r}
+SPEI_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
+
+for (i in 1:tmax_fore_dim[1]){
+	for (j in 1:tmax_fore_dim[2]){
+		print(i)
+		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 6)) # ostatni parametr -> liczba miesi�cy
+		SPEI_fore[i,j,]<-as.vector(a$fitted)		
+	}
+}
+
+range(na.omit(as.numeric(SPEI_fore[,,7])))
+
+
+grid_fore_spei <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_fore_spei$z<-as.numeric(SPEI_fore[,,7])
+
+#prosta mapa
+#levelplot(z ~ lon * lat, data=grid_real_spei)
+
+
+spei_fore_raster<-rasterFromXYZ(grid_fore_spei,crs=4326)
+
+
+pal <- colorRampPalette(c("red","blue"))
+cuts<-seq(-2,2,0.5)
+
+levelplot(z ~ lon * lat, data=grid_fore_spei, at=cuts, pretty=T, col.regions=pal(8),aspect=range_fore_lat/range_fore_lon, main = "SPEI - July 2006")
+
+
+plot(spei_fore_raster,main=time_fore[7],col=pal(8),breaks=cuts)
+plot(both,add=TRUE,lwd=2)
+
+
+```
 
 
 

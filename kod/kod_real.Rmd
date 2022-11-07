@@ -17,6 +17,7 @@ library(RColorBrewer)
 library(lattice)
 library(weathermetrics)
 library(SPEI)
+library(raster)
 ```
 
 ##########################################################################################################################################
@@ -117,7 +118,7 @@ tail(time_real)
 
 Visualization
 ```{r} 
-range(na.omit(as.numeric(tmax_real_array)))
+range(na.omit(as.numeric(tmax_real_array[,,7])))
 range(na.omit(as.numeric(lon_real)))
 range(na.omit(as.numeric(lat_real)))
 
@@ -126,13 +127,21 @@ range_real_lat <- range(na.omit(as.numeric(lat_real)))[2] - range(na.omit(as.num
 
 
 grid_real <- expand.grid(lon=lon_real, lat=lat_real)
+grid_real$z<-as.numeric(tmax_real_array[,,7])
 head(grid_real)
 cutpts <- c(10, 15, 19, 21, 23, 25, 27, 29, 31, 33, 36)
 cutpts
+cuts<-seq(14,36,2)
 
-lon<-lon_real
-lat<-lat_real
-levelplot(tmax_real_array[,,7] ~ lon * lat, data=grid_real, at=cutpts, cuts=11, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_real_lat/range_real_lon)
+levelplot(z ~ lon * lat, data=grid_real, at=cuts, pretty=T, col.regions=(rev(brewer.pal(12,"RdBu"))),aspect=range_real_lat/range_real_lon, main = "Real maximum temperature - July 2006")
+
+
+tmax_real_raster<-rasterFromXYZ(grid_real,crs=4326)
+
+pal <- rev(brewer.pal(10,"RdBu"))
+cuts<-seq(13,33,2)
+plot(tmax_real_raster,main=time_real[7],col=pal,breaks=cuts)
+plot(both,add=TRUE,lwd=2)
 
 ```
 
@@ -229,16 +238,20 @@ which(tmin_real_array == -32768)
 
 Visualization
 ```{r} 
-range(na.omit(as.numeric(tmin_real_array)))
+range(na.omit(as.numeric(tmin_real_array[,,7])))
 range(na.omit(as.numeric(lon_real)))
 range(na.omit(as.numeric(lat_real)))
 
 cutpts <- c(4, 6, 8, 10, 12, 14, 16, 18, 20, 22)
 cutpts
 
-lon<-lon_real
-lat<-lat_real
-levelplot(tmin_real_array[,,7] ~ lon * lat, data=grid_real, at=cutpts, cuts=11, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_real_lat/range_real_lon)
+grid_real <- expand.grid(lon=lon_real, lat=lat_real)
+grid_real$z<-as.numeric(tmin_real_array[,,7])
+cuts<-seq(5,33,4)
+
+levelplot(z ~ lon * lat, data=grid_real, at=cuts, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_real_lat/range_real_lon, main = "Minimum temperature - July 2006")
+
+#levelplot(tmin_real_array[,,7] ~ lon * lat, data=grid_real, at=cutpts, cuts=11, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_real_lat/range_real_lon)
 
 ```
 
@@ -311,27 +324,84 @@ which(ppt_real_array == NA)
 
 Visualization
 ```{r} 
-range(na.omit(as.numeric(ppt_real_array)))
+range(na.omit(as.numeric(ppt_real_array[,,7])))
 range(na.omit(as.numeric(lon_real)))
 range(na.omit(as.numeric(lat_real)))
 
 cutpts <- c(13, 15, 20, 40, 60, 80, 100, 120, 250, 380)
 cutpts
 
-lon<-lon_real
-lat<-lat_real
-levelplot(ppt_real_array[,,7] ~ lon * lat, data=grid_real, at=cutpts, cuts=11, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_real_lat/range_real_lon)
+grid_real <- expand.grid(lon=lon_real, lat=lat_real)
+grid_real$z<-as.numeric(ppt_real_array[,,7])
+cuts<-seq(10,100,10)
+
+levelplot(z ~ lon * lat, data=grid_real, at=cuts, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_real_lat/range_real_lon, main = "Precipitation - July 2006")
+
+#levelplot(z ~ lon * lat, data=grid_real, at=cut, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_real_lat/range_real_lon)
 
 ```
 
 
+PET
+```{r}
+tmax_real_dim <- dim(tmax_real_array)
+PET_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
+
+for (i in 1 : tmax_real_dim[1])
+{
+    for (j in 1 : tmax_real_dim[2])
+    {
+        print(lat_real[j])
+        PET_real[i,j,] <- hargreaves(tmin_real_array[i,j,], tmax_real_array[i,j,], lat=lat_real[j])
+    }
+}
 
 
+range(na.omit(as.numeric(PET_real[,,7])))
+summary(PET_real)
+grid_real_pet <- expand.grid(lon=lon_real, lat=lat_real)
+grid_real_pet$z<-as.numeric(PET_real[,,7])
+#levelplot(z ~ lon * lat,data=grid_real_pet)
+cuts<-c(90, seq(130,210,20))
+
+levelplot(z ~ lon * lat, data=grid_real_pet, at=cuts, pretty=T, col.regions=(rev(brewer.pal(6,"RdBu"))),aspect=range_real_lat/range_real_lon, main = "PET - July 2006")
+
+```
+
+SPEI
+```{r}
+SPEI_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
+
+for (i in 1:tmax_real_dim[1]){
+	for (j in 1:tmax_real_dim[2]){
+		print(i)
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 6)) # ostatni parametr -> liczba miesi�cy
+		SPEI_real[i,j,]<-as.vector(a$fitted)		
+	}
+}
+
+range(na.omit(as.numeric(SPEI_real[,,7])))
 
 
+grid_real_spei <- expand.grid(lon=lon_real, lat=lat_real)
+grid_real_spei$z<-as.numeric(SPEI_real[,,7])
+
+#prosta mapa
+levelplot(z ~ lon * lat, data=grid_real_spei)
+
+
+spei_real_raster<-rasterFromXYZ(grid_real_spei,crs=4326)
+
+
+pal <- colorRampPalette(c("red","blue"))
+cuts<-seq(-2,2,0.5)
+plot(spei_real_raster,main=time_real[7],col=pal(8),breaks=cuts)
+plot(both,add=TRUE,lwd=2)
+
+
+```
 
 
 ```{r}
 
-tmp_pet <- hargreaves(tmin_real_array, tmax_real_array, lat=lat_real)
 ```
