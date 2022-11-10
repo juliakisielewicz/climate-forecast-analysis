@@ -10,17 +10,22 @@ USAGE: variables generated with "kod_real.Rmd" script are needed to properly cli
 source_rmd = function(file, ...) {
   tmp_file = tempfile(fileext=".R")
   on.exit(unlink(tmp_file), add = TRUE)
-  print("AAA")
   knitr::purl(file, output=tmp_file)
-  print("BBB")
   source(file = tmp_file, ...)
 }
 ```
 
+
+RUNNING NECCESSARY FILES
 ```{r}
 source_rmd("D:/AGH/INZ/kod/kod_real.Rmd")
-
 print("running kod_real - success")
+```
+LOADING SAVED WORKSPACE    
+```{r}
+load("D:/AGH/INZ/kod/manual_save.RData")
+source_rmd("D:/AGH/INZ/kod/kod_shapefiles.Rmd")
+Sys.setlocale("LC_TIME", "C")
 
 ```
 
@@ -469,7 +474,7 @@ cuts<-seq(-3,3,0.5)
 
 july_fore <- seq(7, length(time_fore), by=12)
 
-for (i in july_fore)
+for (i in 7:7)
 {
   
   grid_fore_spei <- expand.grid(lon=lon_fore, lat=lat_fore)
@@ -479,7 +484,14 @@ for (i in july_fore)
   
   plot(spei_fore_raster,main=paste("6-month SPEI based on forecasted data - ", time_real[i]),col=pal(12),breaks=cuts)
   plot(both,add=TRUE,lwd=2)
+  
+  ## crop and mask
+  ex <- extent(as_Spatial(both))
+  r2 <- crop(spei_fore_raster, ex)
+  r3 <- mask(r2, as_Spatial(both))
 
+  plot(r3,main=paste("6-month SPEI based on forecasted data - ", time_real[i]),col=pal(12),breaks=cuts)
+  plot(both, add=TRUE, lwd=2)
 }
 ```
 
