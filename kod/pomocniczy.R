@@ -334,3 +334,13 @@ plot(spei_r_WGS,main=time_m_y[7],col=pal(13),breaks=cuts)
 plot(both,add=TRUE,lwd=2)
 
 
+r <- raster(nrow=5, ncol=5, xmn=0, xmx=10, ymn=0, ymx=10, crs="")
+set.seed(1)
+values(r) <- sample(1:25)
+r[r < 15] <- NA
+xyz <- rasterToPoints(r)
+rst <- rasterFromXYZ(xyz)
+plot(r, col=pal(10), breaks=cuts)
+is(r)
+
+is(spei_real_raster)

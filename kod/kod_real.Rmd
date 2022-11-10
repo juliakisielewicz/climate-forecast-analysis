@@ -2,22 +2,22 @@
 title: "R Notebook"
 output: html_notebook
 ---
-SETTING WORKING DIRECTORY
+
+#function for running external .Rmd files
 ```{r}
-setwd("D:/AGH/INZ/data")
+source_rmd = function(file, ...) {
+  tmp_file = tempfile(fileext=".R")
+  on.exit(unlink(tmp_file), add = TRUE)
+  knitr::purl(file, output=tmp_file)
+  source(file = tmp_file, ...)
+}
 ```
 
-LOADING PACKAGES
 ```{r}
-library(ncdf4)
-library(sf)
-library(zoo)
-library(chron)
-library(RColorBrewer)
-library(lattice)
-library(weathermetrics)
-library(SPEI)
-library(raster)
+source_rmd("D:/AGH/INZ/kod/kod_shapefiles.Rmd")
+
+print("running kod_shapefiles - success")
+
 ```
 
 ##########################################################################################################################################
@@ -34,7 +34,7 @@ ncin_real_tmin<-nc_open("real/agg_terraclimate_tmin_1958_CurrentYear_GLOBE.nc")
 ## MAX TEMPERATURE
 
 Data details
-```{r}
+```{r results='hide'}
 print(ncin_real_tmax)
 #tmax[lon,lat,time]
 #coordinate_system: WGS84,EPSG:4326
@@ -343,7 +343,7 @@ levelplot(z ~ lon * lat, data=grid_real, at=cuts, pretty=T, col.regions=(rev(bre
 
 
 PET
-```{r}
+```{r purl = FALSE}
 tmax_real_dim <- dim(tmax_real_array)
 PET_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
 
@@ -351,7 +351,7 @@ for (i in 1 : tmax_real_dim[1])
 {
     for (j in 1 : tmax_real_dim[2])
     {
-        print(lat_real[j])
+        print(i)
         PET_real[i,j,] <- hargreaves(tmin_real_array[i,j,], tmax_real_array[i,j,], lat=lat_real[j])
     }
 }
@@ -369,7 +369,7 @@ levelplot(z ~ lon * lat, data=grid_real_pet, at=cuts, pretty=T, col.regions=(rev
 ```
 
 SPEI
-```{r}
+```{r purl = FALSE}
 SPEI_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
 
 for (i in 1:tmax_real_dim[1]){
@@ -380,24 +380,25 @@ for (i in 1:tmax_real_dim[1]){
 	}
 }
 
-range(na.omit(as.numeric(SPEI_real[,,7])))
-
-
-grid_real_spei <- expand.grid(lon=lon_real, lat=lat_real)
-grid_real_spei$z<-as.numeric(SPEI_real[,,7])
-
-#prosta mapa
-levelplot(z ~ lon * lat, data=grid_real_spei)
-
-
-spei_real_raster<-rasterFromXYZ(grid_real_spei,crs=4326)
-
-
+range(na.omit(as.numeric(SPEI_real[,,175])))
+cuts1 <- c(-3, -1.7, -1.3, -0.8, 0.0, 0.8, 1.3, 1.7, 3)
 pal <- colorRampPalette(c("red","blue"))
-cuts<-seq(-2,2,0.5)
-plot(spei_real_raster,main=time_real[7],col=pal(8),breaks=cuts)
-plot(both,add=TRUE,lwd=2)
+cuts<-seq(-3,3,0.5)
 
+july_real_6 <- seq(7, length(time_real), by=12)
+
+for (i in july_real_6)
+{
+  
+  grid_real_spei <- expand.grid(lon=lon_real, lat=lat_real)
+  grid_real_spei$z<-as.numeric(SPEI_real[,,i])
+  
+  spei_real_raster<-rasterFromXYZ(grid_real_spei,crs=4326)
+  
+  plot(spei_real_raster,main= paste("6-month SPEI based on real data - ", time_real[i]),col=pal(12),breaks=cuts)
+  plot(both,add=TRUE,lwd=2)
+
+}
 
 ```
 

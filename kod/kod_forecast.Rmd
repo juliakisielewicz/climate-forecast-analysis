@@ -5,22 +5,25 @@ output: html_notebook
 
 USAGE: variables generated with "kod_real.Rmd" script are needed to properly clip the area of interest
 
-SETTING WORKING DIRECTORY
+#function for running external .Rmd files
 ```{r}
-setwd("D:/AGH/INZ/data")
+source_rmd = function(file, ...) {
+  tmp_file = tempfile(fileext=".R")
+  on.exit(unlink(tmp_file), add = TRUE)
+  print("AAA")
+  knitr::purl(file, output=tmp_file)
+  print("BBB")
+  source(file = tmp_file, ...)
+}
 ```
 
-LOADING PACKAGES
 ```{r}
-library(ncdf4)
-library(sf)
-library(zoo)
-library(chron)
-library(RColorBrewer)
-library(lattice)
-library(weathermetrics)
-library(lubridate)
+source_rmd("D:/AGH/INZ/kod/kod_real.Rmd")
+
+print("running kod_real - success")
+
 ```
+
 
 ##################################################################################################################################################
 
@@ -460,29 +463,24 @@ for (i in 1:tmax_fore_dim[1]){
 	}
 }
 
-range(na.omit(as.numeric(SPEI_fore[,,7])))
-
-
-grid_fore_spei <- expand.grid(lon=lon_fore, lat=lat_fore)
-grid_fore_spei$z<-as.numeric(SPEI_fore[,,7])
-
-#prosta mapa
-#levelplot(z ~ lon * lat, data=grid_real_spei)
-
-
-spei_fore_raster<-rasterFromXYZ(grid_fore_spei,crs=4326)
-
-
+range(na.omit(as.numeric(SPEI_fore[,,175])))
 pal <- colorRampPalette(c("red","blue"))
-cuts<-seq(-2,2,0.5)
+cuts<-seq(-3,3,0.5)
 
-levelplot(z ~ lon * lat, data=grid_fore_spei, at=cuts, pretty=T, col.regions=pal(8),aspect=range_fore_lat/range_fore_lon, main = "SPEI - July 2006")
+july_fore <- seq(7, length(time_fore), by=12)
 
+for (i in july_fore)
+{
+  
+  grid_fore_spei <- expand.grid(lon=lon_fore, lat=lat_fore)
+  grid_fore_spei$z<-as.numeric(SPEI_fore[,,i])
 
-plot(spei_fore_raster,main=time_fore[7],col=pal(8),breaks=cuts)
-plot(both,add=TRUE,lwd=2)
+  spei_fore_raster<-rasterFromXYZ(grid_fore_spei,crs=4326)
+  
+  plot(spei_fore_raster,main=paste("6-month SPEI based on forecasted data - ", time_real[i]),col=pal(12),breaks=cuts)
+  plot(both,add=TRUE,lwd=2)
 
-
+}
 ```
 
 
