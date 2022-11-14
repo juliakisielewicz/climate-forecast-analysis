@@ -1,0 +1,364 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "D:/AGH/INZ/data")
+```
+
+#function for running external .Rmd files
+```{r}
+source_rmd = function(file, ...) {
+  tmp_file = tempfile(fileext=".R")
+  on.exit(unlink(tmp_file), add = TRUE)
+  knitr::purl(file, output=tmp_file)
+  source(file = tmp_file, ...)
+}
+```
+
+```{r}
+source_rmd("../codes/shapefiles.Rmd")
+#print("running kod_shapefiles - success")
+```
+
+##########################################################################################################################################
+
+# TERRACLIMATE (OBSERVATIONAL DATA)
+
+Loading data
+```{r}
+#setwd("D:/AGH/INZ/data")
+
+ncin_real_ppt<-nc_open("real/agg_terraclimate_ppt_1958_CurrentYear_GLOBE.nc")
+ncin_real_tmax<-nc_open("real/agg_terraclimate_tmax_1958_CurrentYear_GLOBE.nc")
+ncin_real_tmin<-nc_open("real/agg_terraclimate_tmin_1958_CurrentYear_GLOBE.nc")
+```
+
+## MAX TEMPERATURE
+
+Data details
+```{r}
+print(ncin_real_tmax)
+#tmax[lon,lat,time]
+#coordinate_system: WGS84,EPSG:4326
+
+ncatt_get(ncin_real_tmax, 0, "title")
+ncatt_get(ncin_real_tmax, 0, "institution")
+ncatt_get(ncin_real_tmax, 0, "source") # data source
+ncatt_get(ncin_real_tmax, 0, "references")
+ncatt_get(ncin_real_tmax, 0, "history")
+ncatt_get(ncin_real_tmax, 0, "Conventions")
+
+#Checking units
+ncatt_get(ncin_real_tmax,"lon","units") #degrees_east
+ncatt_get(ncin_real_tmax,"lat","units") #degrees_north
+ncatt_get(ncin_real_tmax,"time","units") #"days since 1900-01-01 00:00:00"
+ncatt_get(ncin_real_tmax,"tmax","units") #degC
+
+ncatt_get(ncin_real_tmax,"tmax","long_name") #air_temperature
+ncatt_get(ncin_real_tmax,"tmax","_FillValue") #-32768
+ncatt_get(ncin_real_tmax,"tmax","missing_value") #-32768
+
+```
+
+
+Extracting variables
+```{r}
+lon_real <- ncvar_get(ncin_real_tmax, "lon")
+lat_real <- ncvar_get(ncin_real_tmax, "lat")
+time_real <- ncvar_get(ncin_real_tmax, "time")
+
+dim(lon_real) #217
+dim(lat_real) #145
+dim(time_real) # 192 -> 16 years, 12 months each
+
+head(lon_real) # - => +
+head(lat_real) # + => -
+head(time_real)
+
+tmax_real_array <- ncvar_get(ncin_real_tmax, "tmax")
+
+#NA values
+which(tmax_real_array == -32768)
+#integer(0) <- no need to modify 
+
+```
+
+
+Time units correction
+```{r}
+time_units <- ncatt_get(ncin_real_tmax,"time","units")
+time_units <- strsplit(time_units$value, " ")
+time_units <- strsplit(unlist(time_units)[3], "-")
+
+time_year <- as.integer(unlist(time_units)[1])
+time_month <- as.integer(unlist(time_units)[2])
+time_day <- as.integer(unlist(time_units)[3])
+
+time_real <- chron(time_real, origin = c(time_month, time_day, time_year))
+Sys.setlocale("LC_TIME", "C")
+time_real <- as.yearmon(time_real)
+
+head(time_real)
+tail(time_real)
+#time range: Jan 2006 - Dec 2021
+
+```
+
+Visualization
+```{r} 
+range(na.omit(as.numeric(tmax_real_array[,,7])))
+range(na.omit(as.numeric(lon_real)))
+range(na.omit(as.numeric(lat_real)))
+
+
+range_real_lon <- range(na.omit(as.numeric(lon_real)))[2] - range(na.omit(as.numeric(lon_real)))[1]
+range_real_lat <- range(na.omit(as.numeric(lat_real)))[2] - range(na.omit(as.numeric(lat_real)))[1]
+
+
+grid_real <- expand.grid(lon=lon_real, lat=lat_real)
+grid_real$z<-as.numeric(tmax_real_array[,,7])
+#head(grid_real)
+
+cutpts <- c(10, 15, 19, 21, 23, 25, 27, 29, 31, 33, 36)
+cuts<-seq(13,35,2)
+
+levelplot(z ~ lon * lat, data=grid_real, at=cuts, pretty=T, col.regions=(rev(brewer.pal(12,"RdBu"))),aspect=range_real_lat/range_real_lon, main = "Real maximum temperature - July 2006")
+
+
+#tmax_real_raster<-rasterFromXYZ(grid_real,crs=4326)
+
+#pal <- rev(brewer.pal(12,"RdBu"))
+#plot(tmax_real_raster,main=time_real[7],col=pal,breaks=cuts)
+#plot(both,add=TRUE,lwd=2)
+
+```
+
+## MIN TEMPERATURE
+
+Data details
+(same as tmax)
+```{r}
+print(ncin_real_tmin)
+#tmin[lon,lat,time]
+#coordinate_system: WGS84,EPSG:4326
+
+#Checking units
+ncatt_get(ncin_real_tmin,"lon","units") #degrees_east
+ncatt_get(ncin_real_tmin,"lat","units") #degrees_north
+ncatt_get(ncin_real_tmin,"time","units") #"days since 1900-01-01 00:00:00"
+ncatt_get(ncin_real_tmin,"tmin","units") #degC
+
+ncatt_get(ncin_real_tmin,"tmin","long_name") #air_temperature
+ncatt_get(ncin_real_tmin,"tmin","_FillValue") #-32768
+ncatt_get(ncin_real_tmin,"tmin","missing_value") #-32768
+
+```
+
+
+Extracting variables
+```{r}
+lon_real_tmin <- ncvar_get(ncin_real_tmin, "lon")
+lat_real_tmin <- ncvar_get(ncin_real_tmin, "lat")
+time_real_tmin <- ncvar_get(ncin_real_tmin, "time")
+
+time_units <- ncatt_get(ncin_real_tmin,"time","units")
+time_units <- strsplit(time_units$value, " ")
+time_units <- strsplit(unlist(time_units)[3], "-")
+
+time_year <- as.integer(unlist(time_units)[1])
+time_month <- as.integer(unlist(time_units)[2])
+time_day <- as.integer(unlist(time_units)[3])
+
+time_real_tmin <- chron(time_real_tmin, origin = c(time_month, time_day, time_year))
+Sys.setlocale("LC_TIME", "C")
+time_real_tmin <- as.yearmon(time_real_tmin)
+
+head(time_real_tmin)
+tail(time_real_tmin)
+
+#checking if new variables are necessary
+which((lon_real == lon_real_tmin) == FALSE) #0
+which((lat_real == lat_real_tmin) == FALSE) #0
+which((time_real == time_real_tmin) == FALSE) #0
+#deleting unnecessary variables
+rm(lon_real_tmin, lat_real_tmin, time_real_tmin)
+
+
+tmin_real_array <- ncvar_get(ncin_real_tmin, "tmin")
+
+
+#NA values
+which(tmin_real_array == -32768)
+#integer(0) <- no need to modify 
+
+```
+
+
+Visualization
+```{r} 
+range(na.omit(as.numeric(tmin_real_array[,,7])))
+range(na.omit(as.numeric(lon_real)))
+range(na.omit(as.numeric(lat_real)))
+
+cutpts <- c(4, 6, 8, 10, 12, 14, 16, 18, 20, 22)
+
+grid_real <- expand.grid(lon=lon_real, lat=lat_real)
+grid_real$z<-as.numeric(tmin_real_array[,,7])
+cuts<-seq(5,33,4)
+
+levelplot(z ~ lon * lat, data=grid_real, at=cutpts, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_real_lat/range_real_lon, main = "Minimum temperature - July 2006")
+
+```
+
+## PRECIPITATION
+
+Data details
+
+```{r}
+print(ncin_real_ppt)
+#tmin[lon,lat,time]
+#coordinate_system: WGS84,EPSG:4326
+
+#Checking units
+ncatt_get(ncin_real_ppt,"lon","units") #degrees_east
+ncatt_get(ncin_real_ppt,"lat","units") #degrees_north
+ncatt_get(ncin_real_ppt,"time","units") #"days since 1900-01-01 00:00:00"
+ncatt_get(ncin_real_ppt,"ppt","units") #mm
+
+ncatt_get(ncin_real_ppt,"ppt","long_name") #precipitation_amount
+ncatt_get(ncin_real_ppt,"ppt","_FillValue") #NA
+ncatt_get(ncin_real_ppt,"ppt","missing_value") #NA
+
+```
+
+
+Extracting variables
+```{r}
+lon_real_ppt <- ncvar_get(ncin_real_ppt, "lon")
+lat_real_ppt <- ncvar_get(ncin_real_ppt, "lat")
+time_real_ppt <- ncvar_get(ncin_real_ppt, "time")
+
+time_units <- ncatt_get(ncin_real_ppt,"time","units")
+time_units <- strsplit(time_units$value, " ")
+time_units <- strsplit(unlist(time_units)[3], "-")
+
+time_year <- as.integer(unlist(time_units)[1])
+time_month <- as.integer(unlist(time_units)[2])
+time_day <- as.integer(unlist(time_units)[3])
+
+time_real_ppt <- chron(time_real_ppt, origin = c(time_month, time_day, time_year))
+Sys.setlocale("LC_TIME", "C")
+time_real_ppt <- as.yearmon(time_real_ppt)
+
+head(time_real_ppt)
+tail(time_real_ppt)
+
+#checking if new variables are necessary
+which((lon_real == lon_real_ppt) == FALSE) #0
+which((lat_real == lat_real_ppt) == FALSE) #0
+which((time_real == time_real_ppt) == FALSE) #0
+#deleting unnecessary variables
+rm(lon_real_ppt, lat_real_ppt, time_real_ppt)
+
+
+ppt_real_array <- ncvar_get(ncin_real_ppt, "ppt")
+
+#NA values
+which(ppt_real_array == "NA")
+#integer(0) <- no need to modify 
+
+```
+
+Visualization
+```{r} 
+range(na.omit(as.numeric(ppt_real_array[,,7])))
+range(na.omit(as.numeric(lon_real)))
+range(na.omit(as.numeric(lat_real)))
+
+cutpts <- c(13, 15, 20, 40, 60, 80, 100, 120, 250, 380)
+cutpts
+
+grid_real <- expand.grid(lon=lon_real, lat=lat_real)
+grid_real$z<-as.numeric(ppt_real_array[,,7])
+cuts<-seq(10,100,10)
+
+levelplot(z ~ lon * lat, data=grid_real, at=cuts, pretty=T, col.regions=(rev(brewer.pal(10,"RdBu"))),aspect=range_real_lat/range_real_lon, main = "Precipitation - July 2006")
+
+```
+
+
+PET
+```{r}
+tmax_real_dim <- dim(tmax_real_array)
+PET_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
+
+for (i in 1 : tmax_real_dim[1])
+{
+    for (j in 1 : tmax_real_dim[2])
+    {
+        print(i)
+        PET_real[i,j,] <- hargreaves(tmin_real_array[i,j,], tmax_real_array[i,j,], lat=lat_real[j])
+    }
+}
+
+range(na.omit(as.numeric(PET_real[,,7])))
+summary(PET_real)
+
+#July 2006
+grid_real_pet <- expand.grid(lon=lon_real, lat=lat_real)
+grid_real_pet$z<-as.numeric(PET_real[,,7])
+cuts<-c(90, seq(130,210,20))
+
+levelplot(z ~ lon * lat, data=grid_real_pet, at=cuts, pretty=T, col.regions=(rev(brewer.pal(6,"RdBu"))),aspect=range_real_lat/range_real_lon, main = "PET - July 2006")
+
+```
+
+SPEI
+```{r}
+SPEI_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
+
+for (i in 1:tmax_real_dim[1]){
+	for (j in 1:tmax_real_dim[2]){
+		print(i)
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 6)) # ostatni parametr -> liczba miesi�cy
+		SPEI_real[i,j,]<-as.vector(a$fitted)		
+	}
+}
+
+#range(na.omit(as.numeric(SPEI_real[,,7])))
+pal <- colorRampPalette(c("red","blue"))
+cuts<-seq(-3,3,0.5)
+
+#indexes of every july
+july_real <- seq(7, length(time_real), by=12)
+
+for (i in july_real)
+{
+  
+  grid_real_spei <- expand.grid(lon=lon_real, lat=lat_real)
+  grid_real_spei$z<-as.numeric(SPEI_real[,,i])
+  
+  spei_real_raster<-rasterFromXYZ(grid_real_spei,crs=4326)
+  
+  #plot(spei_real_raster,main= paste("6-month SPEI based on real data - ", time_real[i]),col=pal(12),breaks=cuts)
+  #plot(both,add=TRUE,lwd=2)
+  
+  ## crop and mask
+  ex <- extent(as_Spatial(both))
+  spei_real_r_cropped <- crop(spei_real_raster, ex)
+  spei_real_r_masked <- mask(spei_real_r_cropped, as_Spatial(both))
+
+  plot(spei_real_r_masked, main=paste("6-month SPEI based on real data - ", time_real[i]), col=pal(12), breaks=cuts)
+  plot(as_Spatial(both), add=TRUE, lwd=2)
+
+}
+
+```
+
+
+```{r}
+
+```

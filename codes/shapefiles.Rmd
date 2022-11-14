@@ -1,0 +1,79 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "D:/AGH/INZ/data")
+```
+
+#function for running external .Rmd files
+```{r}
+source_rmd = function(file, ...) {
+  tmp_file = tempfile(fileext=".R")
+  on.exit(unlink(tmp_file), add = TRUE)
+  knitr::purl(file, output=tmp_file)
+  source(file = tmp_file, ...)
+}
+```
+
+```{r}
+source("../codes/setup.R")
+```
+
+
+# SHAPEFILES
+
+```{r}
+#source("D:/AGH/INZ/kod/setup.R", local = knitr::knit_global())
+
+#MALOPOLSKIE & PODKARPACKIE
+south <- st_read("Wojewodztwa/poludnie.shp")
+#Projected CRS: ETRS89 / Poland CS92
+
+south <- st_transform(south, crs = 4326)
+#Geodetic CRS:  WGS 84
+
+south <- st_geometry(south)
+south <- st_union(south)
+south
+#plot(south)
+
+
+
+#WIELKOPOLSKIE & KUJAWSKO-POMORSKIE
+north <- st_read("Wojewodztwa/polnoc.shp")
+#Projected CRS: ETRS89 / Poland CS92
+  
+north <- st_transform(north, crs = 4326)
+#Geodetic CRS:  WGS 84
+
+north <- st_geometry(north)
+north <- st_union(north)
+north
+#plot(north)
+
+
+both <- st_union(south, north)
+```
+
+```{r}
+#MALOPOLSKIE & PODKARPACKIE
+#w <- st_read("Wojewodztwa/Województwa.shp")
+#Projected CRS: ETRS89 / Poland CS92
+
+#w <- st_transform(w, crs = 4326)
+#Geodetic CRS:  WGS 84
+
+#w <- st_geometry(w)
+#w <- st_union(w)
+#w
+#plot(w)
+
+
+#plot(south)
+```
+
+```{r}
+```
