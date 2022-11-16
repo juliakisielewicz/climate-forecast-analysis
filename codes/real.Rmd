@@ -316,18 +316,64 @@ levelplot(z ~ lon * lat, data=grid_real_pet, at=cuts, pretty=T, col.regions=(rev
 
 ```
 
+```{r}
+library(beepr)
+beep(3)
+
+```
+
 SPEI
 ```{r}
-SPEI_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
+SPEI1_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
 
 for (i in 1:tmax_real_dim[1]){
 	for (j in 1:tmax_real_dim[2]){
 		print(i)
-		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 6)) # ostatni parametr -> liczba miesi�cy
-		SPEI_real[i,j,]<-as.vector(a$fitted)		
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 1)) #1 month
+		SPEI1_real[i,j,]<-as.vector(a$fitted)		
 	}
 }
+beep(3)
 
+SPEI3_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
+
+for (i in 1:tmax_real_dim[1]){
+	for (j in 1:tmax_real_dim[2]){
+		print(i)
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 3)) #1 month
+		SPEI3_real[i,j,]<-as.vector(a$fitted)		
+	}
+}
+beep(3)
+
+SPEI6_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
+
+for (i in 1:tmax_real_dim[1]){
+	for (j in 1:tmax_real_dim[2]){
+		print(i)
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 6)) #6 months
+		SPEI6_real[i,j,]<-as.vector(a$fitted)		
+	}
+}
+beep(3)
+
+
+SPEI12_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
+
+for (i in 1:tmax_real_dim[1]){
+	for (j in 1:tmax_real_dim[2]){
+		print(i)
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 12)) #1 month
+		SPEI12_real[i,j,]<-as.vector(a$fitted)		
+	}
+}
+beep(3)
+
+
+```
+
+Visualization
+```{r}
 #range(na.omit(as.numeric(SPEI_real[,,7])))
 pal <- colorRampPalette(c("red","blue"))
 cuts<-seq(-3,3,0.5)
@@ -337,26 +383,28 @@ july_real <- seq(7, length(time_real), by=12)
 
 for (i in july_real)
 {
+  grid_real_spei6 <- expand.grid(lon=lon_real, lat=lat_real)
+  grid_real_spei6$z<-as.numeric(SPEI6_real[,,i])
   
-  grid_real_spei <- expand.grid(lon=lon_real, lat=lat_real)
-  grid_real_spei$z<-as.numeric(SPEI_real[,,i])
+  spei6_real_raster<-rasterFromXYZ(grid_real_spei6,crs=4326)
   
-  spei_real_raster<-rasterFromXYZ(grid_real_spei,crs=4326)
-  
-  #plot(spei_real_raster,main= paste("6-month SPEI based on real data - ", time_real[i]),col=pal(12),breaks=cuts)
+  plot(spei6_real_raster,main= paste("6-month SPEI based on real data - ", time_real[i]),col=pal(12),breaks=cuts)
   #plot(both,add=TRUE,lwd=2)
   
   ## crop and mask
-  ex <- extent(as_Spatial(both))
-  spei_real_r_cropped <- crop(spei_real_raster, ex)
-  spei_real_r_masked <- mask(spei_real_r_cropped, as_Spatial(both))
+  #ex <- extent(as_Spatial(both))
+  #spei_real_r_cropped <- crop(spei_real_raster, ex)
+  #spei_real_r_masked <- mask(spei_real_r_cropped, as_Spatial(both))
 
-  plot(spei_real_r_masked, main=paste("6-month SPEI based on real data - ", time_real[i]), col=pal(12), breaks=cuts)
-  plot(as_Spatial(both), add=TRUE, lwd=2)
+  #plot(spei_real_r_masked, main=paste("6-month SPEI based on real data - ", time_real[i]), col=pal(12), breaks=cuts)
+  #plot(as_Spatial(both), add=TRUE, lwd=2)
 
 }
 
 ```
+
+
+
 
 
 ```{r}

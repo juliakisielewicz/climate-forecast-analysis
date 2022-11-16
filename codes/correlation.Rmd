@@ -1,0 +1,273 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "D:/AGH/INZ/data")
+```
+
+#function for running external .Rmd files
+```{r}
+source_rmd = function(file, ...) {
+  tmp_file = tempfile(fileext=".R")
+  on.exit(unlink(tmp_file), add = TRUE)
+  knitr::purl(file, output=tmp_file)
+  source(file = tmp_file, ...)
+}
+```
+
+```{r}
+source_rmd("../codes/forecast.Rmd")
+```
+
+LOADING SAVED WORKSPACE
+```{r}
+#load("D:/AGH/INZ/codes/manual_save.RData")
+#source_rmd("D:/AGH/INZ/codes/shapefiles.Rmd")
+#Sys.setlocale("LC_TIME", "C")
+```
+
+########################################################################################################
+
+#FITTING GRIDS
+
+COMPARING RESAMPLE CONFIGURATIONS
+```{r}
+
+lon_real_raster = raster(ncol=length(lon_real), nrow=length(lat_real))
+lat_real_raster = raster(ncol=length(lon_real), nrow=length(lat_real))
+lon_fore_raster = raster(ncol=length(lon_fore), nrow=length(lat_fore))
+lat_fore_raster = raster(ncol=length(lon_fore), nrow=length(lat_fore))
+
+values(lon_real_raster) = as.vector(grid_real_spei6[,1])
+values(lat_real_raster) = as.vector(grid_real_spei6[,2])
+values(lon_fore_raster) = as.vector(grid_fore_spei6[,1])
+values(lat_fore_raster) = as.vector(grid_fore_spei6[,2])
+
+par(mfrow=c(2,2))
+plot(lon_real_raster)                         
+plot(lat_real_raster)
+plot(lon_fore_raster)
+plot(lat_fore_raster)
+
+#######################################################################
+#forecast to real (5->4)
+lon_fore_bilinear <- resample(lon_fore_raster, lon_real_raster, method='bilinear')
+lat_fore_bilinear <- resample(lat_fore_raster, lat_real_raster, method='bilinear')
+
+ncol(lon_real_raster)
+
+mse1=0
+for (i in 1:dim(lon_fore_bilinear)[1])
+{
+  for (j in 1:dim(lon_fore_bilinear)[2])
+  {
+    print(i)
+    mse1 = mse1 + sqrt((lon_fore_bilinear[i,j] - lon_real_raster[i,j])^2 + (lat_fore_bilinear[i,j] - lat_real_raster[i,j])^2)
+  }
+}
+mse1 = mse1 / (dim(lon_fore_bilinear)[1] * dim(lon_fore_bilinear)[2]) 
+mse1 #0.01299204
+
+
+#######################################################################
+#real to forecast (4->5)
+lon_real_bilinear <- resample(lon_real_raster, lon_fore_raster, method='bilinear')
+lat_real_bilinear <- resample(lat_real_raster, lat_fore_raster, method='bilinear')
+
+ncol(lon_real_bilinear)
+
+mse2=0
+for (i in 1:dim(lon_real_bilinear)[1])
+{
+  for (j in 1:dim(lon_real_bilinear)[2])
+  {
+    print(i)
+    mse2 = mse2 + sqrt((lon_real_bilinear[i,j] - lon_fore_raster[i,j])^2 + (lat_real_bilinear[i,j] - lat_fore_raster[i,j])^2)
+  }
+}
+mse2 = mse2 / (dim(lon_real_bilinear)[1] * dim(lon_real_bilinear)[2]) 
+mse2 #0.01299202
+
+mse1
+mse2
+#smaller MSE for second option (real to forecast)
+```
+
+PREPARING RASTERSTACKS
+
+SPEI1
+```{r}
+spei1_real_list = list()
+spei1_fore_list = list()
+
+grid_fore_spei1 <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_spei1 <- expand.grid(lon=lon_real, lat=lat_real)
+
+for (i in july_real) #same as july_fore
+{
+  #forecast
+  grid_fore_spei1$z<-as.numeric(SPEI1_fore[,,i])
+  spei1_fore_raster<-rasterFromXYZ(grid_fore_spei1,crs=4321)
+  spei1_fore_list <- append(spei1_fore_list, spei1_fore_raster)
+  
+  #real
+  grid_real_spei1$z<-as.numeric(SPEI1_real[,,i])
+  spei1_real_raster<-rasterFromXYZ(grid_real_spei1,crs=4321)
+  spei1_real_r2 <- resample(spei1_real_raster, spei1_fore_raster, method='bilinear')
+  spei1_real_list <- append(spei1_real_list, spei1_real_r2)
+}
+
+real_spei1_stack <- stack(spei1_real_list)
+fore_spei1_stack <- stack(spei1_fore_list)
+plot(real_spei1_stack)
+plot(fore_spei1_stack)
+```
+
+SPEI3
+```{r}
+spei3_real_list = list()
+spei3_fore_list = list()
+
+grid_fore_spei3 <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_spei3 <- expand.grid(lon=lon_real, lat=lat_real)
+
+for (i in july_real) #same as july_fore
+{
+  #forecast
+  grid_fore_spei3$z<-as.numeric(SPEI3_fore[,,i])
+  spei3_fore_raster<-rasterFromXYZ(grid_fore_spei3,crs=4323)
+  spei3_fore_list <- append(spei3_fore_list, spei3_fore_raster)
+  
+  #real
+  grid_real_spei3$z<-as.numeric(SPEI3_real[,,i])
+  spei3_real_raster<-rasterFromXYZ(grid_real_spei3,crs=4323)
+  spei3_real_r2 <- resample(spei3_real_raster, spei3_fore_raster, method='bilinear')
+  spei3_real_list <- append(spei3_real_list, spei3_real_r2)
+}
+
+real_spei3_stack <- stack(spei3_real_list)
+fore_spei3_stack <- stack(spei3_fore_list)
+plot(real_spei3_stack)
+plot(fore_spei3_stack)
+```
+
+SPEI6
+```{r}
+spei6_real_list = list()
+spei6_fore_list = list()
+
+grid_fore_spei6 <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_spei6 <- expand.grid(lon=lon_real, lat=lat_real)
+
+for (i in july_real) #same as july_fore
+{
+  #forecast
+  grid_fore_spei6$z<-as.numeric(SPEI6_fore[,,i])
+  spei6_fore_raster<-rasterFromXYZ(grid_fore_spei6,crs=4326)
+  spei6_fore_list <- append(spei6_fore_list, spei6_fore_raster)
+  
+  #real
+  grid_real_spei6$z<-as.numeric(SPEI6_real[,,i])
+  spei6_real_raster<-rasterFromXYZ(grid_real_spei6,crs=4326)
+  spei6_real_r2 <- resample(spei6_real_raster, spei6_fore_raster, method='bilinear')
+  spei6_real_list <- append(spei6_real_list, spei6_real_r2)
+}
+
+real_spei6_stack <- stack(spei6_real_list)
+fore_spei6_stack <- stack(spei6_fore_list)
+plot(real_spei6_stack)
+plot(fore_spei6_stack)
+```
+
+SPEI12
+```{r}
+spei12_real_list = list()
+spei12_fore_list = list()
+
+grid_fore_spei12 <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_spei12 <- expand.grid(lon=lon_real, lat=lat_real)
+
+for (i in july_real) #same as july_fore
+{
+  #forecast
+  grid_fore_spei12$z<-as.numeric(SPEI12_fore[,,i])
+  spei12_fore_raster<-rasterFromXYZ(grid_fore_spei12,crs=43212)
+  spei12_fore_list <- append(spei12_fore_list, spei12_fore_raster)
+  
+  #real
+  grid_real_spei12$z<-as.numeric(SPEI12_real[,,i])
+  spei12_real_raster<-rasterFromXYZ(grid_real_spei12,crs=43212)
+  spei12_real_r2 <- resample(spei12_real_raster, spei12_fore_raster, method='bilinear')
+  spei12_real_list <- append(spei12_real_list, spei12_real_r2)
+}
+
+real_spei12_stack <- stack(spei12_real_list)
+fore_spei12_stack <- stack(spei12_fore_list)
+plot(real_spei12_stack)
+plot(fore_spei12_stack)
+```
+
+CORRELATION
+
+SPEI1
+```{r}
+#pearson
+corr_p1 <- corLocal(real_spei1_stack, fore_spei1_stack, method="pearson", test=TRUE)
+plot(corr_p1)
+corr_p1_mask <- mask(corr_p1[[1]], corr_p1[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_p1_mask)
+
+#spearman
+corr_s1 <- corLocal(real_spei1_stack, fore_spei1_stack, method="spearman", test=TRUE)
+plot(corr_s1)
+corr_s1_mask <- mask(corr_s1[[1]], corr_s1[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_s1_mask)
+```
+
+SPEI3
+```{r}
+#pearson
+corr_p3 <- corLocal(real_spei3_stack, fore_spei3_stack, method="pearson", test=TRUE)
+plot(corr_p3)
+corr_p3_mask <- mask(corr_p3[[1]], corr_p3[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_p3_mask)
+
+#spearman
+corr_s3 <- corLocal(real_spei3_stack, fore_spei3_stack, method="spearman", test=TRUE)
+plot(corr_s3)
+corr_s3_mask <- mask(corr_s3[[1]], corr_s3[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_s3_mask)
+```
+
+SPEI6
+```{r}
+#pearson
+corr_p6 <- corLocal(real_spei6_stack, fore_spei6_stack, method="pearson", test=TRUE)
+plot(corr_p6)
+corr_p6_mask <- mask(corr_p6[[1]], corr_p6[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_p6_mask)
+
+#spearman
+corr_s6 <- corLocal(real_spei6_stack, fore_spei6_stack, method="spearman", test=TRUE)
+plot(corr_s6)
+corr_s6_mask <- mask(corr_s6[[1]], corr_s6[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_s6_mask)
+```
+
+SPEI12
+```{r}
+#pearson
+corr_p12 <- corLocal(real_spei12_stack, fore_spei12_stack, method="pearson", test=TRUE)
+plot(corr_p12)
+corr_p12_mask <- mask(corr_p12[[1]], corr_p12[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_p12_mask)
+
+#spearman
+corr_s12 <- corLocal(real_spei12_stack, fore_spei12_stack, method="spearman", test=TRUE)
+plot(corr_s12)
+corr_s12_mask <- mask(corr_s12[[1]], corr_s12[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_s12_mask)
+```

@@ -395,3 +395,205 @@ plot(cropped_gridpoints,col="Red")
 spgrid <- SpatialPixels(cropped_gridpoints)
 coordnames(spgrid) <- c("x", "y")
 plot(spgrid)
+
+
+
+
+########################################################################################################################################
+
+(as.numeric(ncatt_get(ncin_real_ppt, 0,"geospatial_lat_min")))[2]
+
+
+
+
+p <- raster(nrow=3, ncol=3)
+values(p) <- 1:ncell(p)
+r <- raster(nrow=10, ncol=10)
+values(r) <- 1:ncell(r)
+s <- raster(nrow=3, ncol=3)
+s <- resample(r, s, method='bilinear')
+par(mfrow=c(1,3))
+plot(r)
+plot(s)
+plot(p)
+
+
+nrow(spei_real_raster)
+ncol(spei_real_raster)
+
+nrow(spei_fore_raster)
+ncol(spei_fore_raster)
+spei_fore_raster[1]
+head(grid_real_spei$lon, n=20)
+head(grid_fore_spei$lon, n=20)
+
+grid_real_spei$lon[length(grid_real_spei$lon)] - grid_real_spei$lon[1]
+grid_fore_spei$lon[length(grid_fore_spei$lon)] - grid_fore_spei$lon[1]
+
+grid_real_spei$lat[length(grid_real_spei$lat)] - grid_real_spei$lat[1]
+grid_fore_spei$lat[length(grid_fore_spei$lat)] - grid_fore_spei$lat[1]
+
+#spei_real_gen <- resample(spei_real_raster
+                          
+spei_fore_bilinear <- resample(spei_fore_raster, spei_real_raster, method='bilinear')
+
+
+spei_fore_raster$lon[1]                          
+
+
+
+
+##########
+projection(spei_fore_bilinear)
+
+# Convert raster to SpatialPointsDataFrame
+pts <- rasterToPoints(spei_fore_bilinear, spatial=TRUE)
+proj4string(pts)
+
+# reproject sp object
+geo.prj <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0" 
+pts <- spTransform(pts, CRS(proj4string(pts))) 
+proj4string(pts)
+
+# Assign coordinates to @data slot, display first 6 rows of data.frame
+pts@data <- data.frame(pts@data, long=coordinates(pts)[,1],
+                         lat=coordinates(pts)[,2])                         
+head(pts@data)
+
+
+#calculate MSE
+mean((unique(pts@data$long) - lon_real)^2)
+
+
+###################################################################################
+lon_real_2d = t(array(grid_real_spei[,1],dim=c(length(lon_real),length(lat_real))))
+lat_real_2d = t(array(grid_real_spei[,2],dim=c(length(lon_real),length(lat_real))))
+lon_fore_2d = t(array(grid_real_spei[,1],dim=c(length(lon_real),length(lat_real))))
+lat_fore_2d = t(array(grid_real_spei[,2],dim=c(length(lon_real),length(lat_real))))
+
+lon_real_raster = raster(ncol=length(lon_real), nrow=length(lat_real))
+lat_real_raster = raster(ncol=length(lon_real), nrow=length(lat_real))
+lon_fore_raster = raster(ncol=length(lon_fore), nrow=length(lat_fore))
+lat_fore_raster = raster(ncol=length(lon_fore), nrow=length(lat_fore))
+
+values(lon_real_raster) = as.vector(grid_real_spei[,1])
+values(lat_real_raster) = as.vector(grid_real_spei[,2])
+values(lon_fore_raster) = as.vector(grid_fore_spei[,1])
+values(lat_fore_raster) = as.vector(grid_fore_spei[,2])
+
+par(mfrow=c(2,2))
+plot(lon_real_raster)                         
+plot(lat_real_raster)
+plot(lon_fore_raster)
+plot(lat_fore_raster)
+
+#5->4
+lon_fore_bilinear <- resample(lon_fore_raster, lon_real_raster, method='bilinear')
+lat_fore_bilinear <- resample(lat_fore_raster, lat_real_raster, method='bilinear')
+
+ncol(lon_real_raster)
+
+mse1=0
+for (i in 1:dim(lon_fore_bilinear)[1])
+{
+  for (j in 1:dim(lon_fore_bilinear)[2])
+  {
+    print(i)
+    mse1 = mse1 + sqrt((lon_fore_bilinear[i,j] - lon_real_raster[i,j])^2 + (lat_fore_bilinear[i,j] - lat_real_raster[i,j])^2)
+  }
+}
+mse1 = mse1 / (dim(lon_fore_bilinear)[1] * dim(lon_fore_bilinear)[2]) 
+mse1 #0.01299204
+
+#4->5
+lon_real_bilinear <- resample(lon_real_raster, lon_fore_raster, method='bilinear')
+lat_real_bilinear <- resample(lat_real_raster, lat_fore_raster, method='bilinear')
+
+ncol(lon_real_bilinear)
+
+mse2=0
+for (i in 1:dim(lon_real_bilinear)[1])
+{
+  for (j in 1:dim(lon_real_bilinear)[2])
+  {
+    print(i)
+    mse2 = mse2 + sqrt((lon_real_bilinear[i,j] - lon_fore_raster[i,j])^2 + (lat_real_bilinear[i,j] - lat_fore_raster[i,j])^2)
+  }
+}
+mse2 = mse2 / (dim(lon_real_bilinear)[1] * dim(lon_real_bilinear)[2]) 
+mse2 #0.01299202
+
+
+
+#4,5->20
+
+(lon_real[123] - lon_real[122]) - (lon_fore[123] - lon_fore[122])
+lat_fore[123] - lat_fore[122]
+
+#wielkosc oczka siatki, jednostka - stopien:
+#real: 0.04166667
+#fore: 0.04490319
+
+raster20 <- raster(ncol=, nrow=)
+
+217/4
+202/5
+145/4
+135/5
+
+(lon_fore_max - lon_fore_min) / 202
+(lat_fore_max - lat_fore_min) / 135
+
+lon_real_bilinear20 <- resample(lon_real_raster, lon_fore_raster, method='bilinear')
+lat_real_bilinear20 <- resample(lat_real_raster, lat_fore_raster, method='bilinear')
+lon_fore_bilinear20 <- resample(lon_fore_raster, lon_fore_raster, method='bilinear')
+lat_fore_bilinear20 <- resample(lat_fore_raster, lat_fore_raster, method='bilinear')
+
+ncol(lon_real_bilinear)
+
+mse3=0
+for (i in 1:dim(lon_real_bilinear)[1])
+{
+  for (j in 1:dim(lon_real_bilinear)[2])
+  {
+    print(i)
+    mse3 = mse3 + sqrt((lon_real_bilinear[i,j] - lon_fore_raster[i,j])^2 + (lat_real_bilinear[i,j] - lat_fore_raster[i,j])^2)
+  }
+}
+mse3 = mse3 / (dim(lon_real_bilinear)[1] * dim(lon_real_bilinear)[2]) 
+mse3 
+
+spei6_real_arr = list()
+spei6_fore_arr = list()
+
+for (i in july_real)
+{
+  
+  grid_fore_spei <- expand.grid(lon=lon_fore, lat=lat_fore)
+  grid_fore_spei$z<-as.numeric(SPEI_fore[,,i])
+  
+  spei_fore_raster<-rasterFromXYZ(grid_fore_spei,crs=4326)
+  
+  spei6_fore_arr <- append(spei6_fore_arr, spei_fore_raster)
+  
+  
+ 
+  grid_real_spei <- expand.grid(lon=lon_real, lat=lat_real)
+  grid_real_spei$z<-as.numeric(SPEI_real[,,i])
+  
+  spei_real_raster<-rasterFromXYZ(grid_real_spei,crs=4326)
+  spei_real_r2 <- resample(spei_real_raster, spei_fore_raster, method='bilinear')
+  
+  spei6_real_arr <- append(spei6_real_arr, spei_real_r2)
+}
+
+
+real_spei6_stack <- stack(spei6_real_arr)
+fore_spei6_stack <- stack(spei6_fore_arr)
+plot(real_spei6_stack)
+plot(fore_spei6_stack)
+
+x <- corLocal(real_spei6_stack, fore_spei6_stack, method="spearman", test=TRUE)
+plot(x)
+xm <- mask(x[[1]], x[[2]] < 0.05, maskvalue=FALSE)
+plot(xm)
