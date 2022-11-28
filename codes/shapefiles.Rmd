@@ -59,18 +59,19 @@ both <- st_union(south, north)
 ```
 
 ```{r}
-#MALOPOLSKIE & PODKARPACKIE
-#w <- st_read("Wojewodztwa/Województwa.shp")
+#POLSKA
+pol <- st_read("Wojewodztwa/Województwa.shp")
 #Projected CRS: ETRS89 / Poland CS92
 
-#w <- st_transform(w, crs = 4326)
+pol <- st_transform(pol, crs = 4326)
 #Geodetic CRS:  WGS 84
 
-#w <- st_geometry(w)
-#w <- st_union(w)
+pol <- st_geometry(pol)
+pol <- st_union(pol)
 #w
-#plot(w)
+#plot(pol)
 
+#boundry <- bind(pol, south, north)
 
 #plot(south)
 ```

@@ -180,6 +180,10 @@ real_spei6_stack <- stack(spei6_real_list)
 fore_spei6_stack <- stack(spei6_fore_list)
 plot(real_spei6_stack)
 plot(fore_spei6_stack)
+
+writeRaster(real_spei3_stack, "rasters/stacks/real_spei3_stack.tif", format="GTiff")
+writeRaster(fore_spei3_stack, "rasters/stacks/forecast_spei3_stack.tif", format="GTiff")
+
 ```
 
 SPEI12
@@ -193,7 +197,7 @@ grid_real_spei12 <- expand.grid(lon=lon_real, lat=lat_real)
 for (i in july_real) #same as july_fore
 {
   #forecast
-  grid_fore_spei12$z<-as.numeric(SPEI12_fore[,,i])
+  grid_fore_spei12$z<-as.numeric(SPEI12_fore[,,7])
   spei12_fore_raster<-rasterFromXYZ(grid_fore_spei12,crs=43212)
   spei12_fore_list <- append(spei12_fore_list, spei12_fore_raster)
   
@@ -219,12 +223,14 @@ corr_p1 <- corLocal(real_spei1_stack, fore_spei1_stack, method="pearson", test=T
 plot(corr_p1)
 corr_p1_mask <- mask(corr_p1[[1]], corr_p1[[2]] < 0.05, maskvalue=FALSE)
 plot(corr_p1_mask)
+plot(both, add=TRUE, lwd=2)
 
 #spearman
 corr_s1 <- corLocal(real_spei1_stack, fore_spei1_stack, method="spearman", test=TRUE)
 plot(corr_s1)
 corr_s1_mask <- mask(corr_s1[[1]], corr_s1[[2]] < 0.05, maskvalue=FALSE)
 plot(corr_s1_mask)
+plot(both, add=TRUE, lwd=2)
 ```
 
 SPEI3
@@ -234,12 +240,15 @@ corr_p3 <- corLocal(real_spei3_stack, fore_spei3_stack, method="pearson", test=T
 plot(corr_p3)
 corr_p3_mask <- mask(corr_p3[[1]], corr_p3[[2]] < 0.05, maskvalue=FALSE)
 plot(corr_p3_mask)
+plot(both, add=TRUE, lwd=2)
 
 #spearman
 corr_s3 <- corLocal(real_spei3_stack, fore_spei3_stack, method="spearman", test=TRUE)
 plot(corr_s3)
 corr_s3_mask <- mask(corr_s3[[1]], corr_s3[[2]] < 0.05, maskvalue=FALSE)
 plot(corr_s3_mask)
+plot(both, add=TRUE, lwd=2)
+
 ```
 
 SPEI6
@@ -249,12 +258,15 @@ corr_p6 <- corLocal(real_spei6_stack, fore_spei6_stack, method="pearson", test=T
 plot(corr_p6)
 corr_p6_mask <- mask(corr_p6[[1]], corr_p6[[2]] < 0.05, maskvalue=FALSE)
 plot(corr_p6_mask)
+plot(both, add=TRUE, lwd=2)
 
 #spearman
 corr_s6 <- corLocal(real_spei6_stack, fore_spei6_stack, method="spearman", test=TRUE)
 plot(corr_s6)
 corr_s6_mask <- mask(corr_s6[[1]], corr_s6[[2]] < 0.05, maskvalue=FALSE)
 plot(corr_s6_mask)
+plot(both, add=TRUE, lwd=2)
+
 ```
 
 SPEI12
@@ -264,10 +276,444 @@ corr_p12 <- corLocal(real_spei12_stack, fore_spei12_stack, method="pearson", tes
 plot(corr_p12)
 corr_p12_mask <- mask(corr_p12[[1]], corr_p12[[2]] < 0.05, maskvalue=FALSE)
 plot(corr_p12_mask)
+plot(both, add=TRUE, lwd=2)
 
 #spearman
 corr_s12 <- corLocal(real_spei12_stack, fore_spei12_stack, method="spearman", test=TRUE)
 plot(corr_s12)
 corr_s12_mask <- mask(corr_s12[[1]], corr_s12[[2]] < 0.05, maskvalue=FALSE)
 plot(corr_s12_mask)
+plot(both, add=TRUE, lwd=2)
+
+```
+
+
+
+
+Visualization
+
+```{r}
+#PEARSON
+plot(corr_p1, main="SPEI1")
+plot(corr_p3, main="SPEI3")
+plot(corr_p6, main="SPEI6")
+plot(corr_p12, main="SPEI12")
+
+#masked
+par(mfrow=c(2,2))
+plot(corr_p1_mask, main = "SPEI1 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_p3_mask, main = "SPEI3 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_p6_mask, main = "SPEI6 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_p12_mask, main = "SPEI12 masked")
+plot(both, add=TRUE, lwd=2)
+
+
+#SPEARMAN
+plot(corr_s1, main="SPEI1")
+plot(corr_s3, main="SPEI3")
+plot(corr_s6, main="SPEI6")
+plot(corr_s12, main="SPEI12")
+
+#masked
+par(mfrow=c(2,2))
+plot(corr_s1_mask, main = "SPEI1 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_s3_mask, main = "SPEI3 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_s6_mask, main = "SPEI6 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_s12_mask, main = "SPEI12 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_s12_mask, main = "SPEI12 masked")
+plot(both, add=TRUE, lwd=2)
+```
+
+
+##############################################################################################
+##############################################################################################
+
+
+PREPARING RASTERSTACKS - option 2
+
+SPEI1
+```{r}
+spei1_real_list = list()
+spei1_fore_list = list()
+
+grid_fore_spei1 <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_spei1 <- expand.grid(lon=lon_real, lat=lat_real)
+
+for (i in july_real) #same as july_fore
+{
+
+  #real
+  grid_real_spei1$z<-as.numeric(SPEI1_real[,,i])
+  spei1_real_raster<-rasterFromXYZ(grid_real_spei1,crs=4321)
+  spei1_real_list <- append(spei1_real_list, spei1_real_raster)
+
+  #forecast
+  grid_fore_spei1$z<-as.numeric(SPEI1_fore[,,i])
+  spei1_fore_raster<-rasterFromXYZ(grid_fore_spei1,crs=4321)
+  spei1_fore_r2 <- resample(spei1_fore_raster, spei1_real_raster, method='bilinear')
+  spei1_fore_list <- append(spei1_fore_list, spei1_fore_r2)
+  
+}
+
+real_spei1_stack_2 <- stack(spei1_real_list)
+fore_spei1_stack_2 <- stack(spei1_fore_list)
+plot(real_spei1_stack_2)
+plot(fore_spei1_stack_2)
+```
+
+SPEI3
+```{r}
+spei3_real_list = list()
+spei3_fore_list = list()
+
+grid_fore_spei3 <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_spei3 <- expand.grid(lon=lon_real, lat=lat_real)
+
+for (i in july_real) #same as july_fore
+{
+  #real
+  grid_real_spei3$z<-as.numeric(SPEI3_real[,,i])
+  spei3_real_raster<-rasterFromXYZ(grid_real_spei3,crs=4323)
+  spei3_real_list <- append(spei3_real_list, spei3_real_raster)
+
+  #forecast
+  grid_fore_spei3$z<-as.numeric(SPEI3_fore[,,i])
+  spei3_fore_raster<-rasterFromXYZ(grid_fore_spei3,crs=4323)
+  spei3_fore_r2 <- resample(spei3_fore_raster, spei3_real_raster, method='bilinear')
+  spei3_fore_list <- append(spei3_fore_list, spei3_fore_r2)
+  
+  
+}
+
+real_spei3_stack_2 <- stack(spei3_real_list)
+fore_spei3_stack_2 <- stack(spei3_fore_list)
+plot(real_spei3_stack_2)
+plot(fore_spei3_stack_2)
+```
+
+SPEI6
+```{r}
+spei6_real_list = list()
+spei6_fore_list = list()
+
+grid_fore_spei6 <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_spei6 <- expand.grid(lon=lon_real, lat=lat_real)
+
+for (i in july_real) #same as july_fore
+{
+  #real
+  grid_real_spei6$z<-as.numeric(SPEI6_real[,,i])
+  spei6_real_raster<-rasterFromXYZ(grid_real_spei6,crs=4326)
+  spei6_real_list <- append(spei6_real_list, spei6_real_raster)
+
+  #forecast
+  grid_fore_spei6$z<-as.numeric(SPEI6_fore[,,i])
+  spei6_fore_raster<-rasterFromXYZ(grid_fore_spei6,crs=4326)
+  spei6_fore_r2 <- resample(spei6_fore_raster, spei6_real_raster, method='bilinear')
+  spei6_fore_list <- append(spei6_fore_list, spei6_fore_r2)
+  
+  
+}
+
+real_spei6_stack_2 <- stack(spei6_real_list)
+fore_spei6_stack_2 <- stack(spei6_fore_list)
+plot(real_spei6_stack_2)
+plot(fore_spei6_stack_2)
+```
+
+SPEI12
+```{r}
+spei12_real_list = list()
+spei12_fore_list = list()
+
+grid_fore_spei12 <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_spei12 <- expand.grid(lon=lon_real, lat=lat_real)
+
+for (i in july_real) #same as july_fore
+{
+  #real
+  grid_real_spei12$z<-as.numeric(SPEI12_real[,,i])
+  spei12_real_raster<-rasterFromXYZ(grid_real_spei12,crs=43212)
+  spei12_real_list <- append(spei12_real_list, spei12_real_raster)
+
+  #forecast
+  grid_fore_spei12$z<-as.numeric(SPEI12_fore[,,i])
+  spei12_fore_raster<-rasterFromXYZ(grid_fore_spei12,crs=43212)
+  spei12_fore_r2 <- resample(spei12_fore_raster, spei12_real_raster, method='bilinear')
+  spei12_fore_list <- append(spei12_fore_list, spei12_fore_r2)
+  
+  
+}
+
+real_spei12_stack_2 <- stack(spei12_real_list)
+fore_spei12_stack_2 <- stack(spei12_fore_list)
+plot(real_spei12_stack_2)
+plot(fore_spei12_stack_2)
+```
+
+
+
+CORRELATION - option 2
+
+SPEI1
+```{r}
+#pearson
+corr_p1 <- corLocal(real_spei1_stack_2, fore_spei1_stack_2, method="pearson", test=TRUE)
+plot(corr_p1)
+corr_p1_mask <- mask(corr_p1[[1]], corr_p1[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_p1_mask)
+plot(both, add=TRUE, lwd=2)
+
+#spearman
+corr_s1 <- corLocal(real_spei1_stack_2, fore_spei1_stack_2, method="spearman", test=TRUE)
+plot(corr_s1)
+corr_s1_mask <- mask(corr_s1[[1]], corr_s1[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_s1_mask)
+plot(both, add=TRUE, lwd=2)
+```
+
+SPEI3
+```{r}
+#pearson
+corr_p3 <- corLocal(real_spei3_stack_2, fore_spei3_stack_2, method="pearson", test=TRUE)
+plot(corr_p3)
+corr_p3_mask <- mask(corr_p3[[1]], corr_p3[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_p3_mask)
+plot(both, add=TRUE, lwd=2)
+
+#spearman
+corr_s3 <- corLocal(real_spei3_stack_2, fore_spei3_stack_2, method="spearman", test=TRUE)
+plot(corr_s3)
+corr_s3_mask <- mask(corr_s3[[1]], corr_s3[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_s3_mask)
+plot(both, add=TRUE, lwd=2)
+
+```
+
+SPEI6
+```{r}
+#pearson
+corr_p6 <- corLocal(real_spei6_stack_2, fore_spei6_stack_2, method="pearson", test=TRUE)
+plot(corr_p6)
+corr_p6_mask <- mask(corr_p6[[1]], corr_p6[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_p6_mask)
+plot(both, add=TRUE, lwd=2)
+
+#spearman
+corr_s6 <- corLocal(real_spei6_stack_2, fore_spei6_stack_2, method="spearman", test=TRUE)
+plot(corr_s6)
+corr_s6_mask <- mask(corr_s6[[1]], corr_s6[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_s6_mask)
+plot(both, add=TRUE, lwd=2)
+
+```
+
+SPEI12
+```{r}
+#pearson
+corr_p12 <- corLocal(real_spei12_stack_2, fore_spei12_stack_2, method="pearson", test=TRUE)
+plot(corr_p12)
+corr_p12_mask <- mask(corr_p12[[1]], corr_p12[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_p12_mask)
+plot(both, add=TRUE, lwd=2)
+
+#spearman
+corr_s12 <- corLocal(real_spei12_stack_2, fore_spei12_stack_2, method="spearman", test=TRUE)
+plot(corr_s12)
+corr_s12_mask <- mask(corr_s12[[1]], corr_s12[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_s12_mask)
+plot(both, add=TRUE, lwd=2)
+
+```
+
+
+
+
+Visualization
+
+```{r}
+#PEARSON
+plot(corr_p1, main="SPEI1")
+plot(corr_p3, main="SPEI3")
+plot(corr_p6, main="SPEI6")
+plot(corr_p12, main="SPEI12")
+
+#masked
+par(mfrow=c(2,2))
+plot(corr_p1_mask, main = "SPEI1 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_p3_mask, main = "SPEI3 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_p6_mask, main = "SPEI6 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_p12_mask, main = "SPEI12 masked")
+plot(both, add=TRUE, lwd=2)
+
+
+#SPEARMAN
+plot(corr_s1, main="SPEI1")
+plot(corr_s3, main="SPEI3")
+plot(corr_s6, main="SPEI6")
+plot(corr_s12, main="SPEI12")
+
+#masked
+par(mfrow=c(2,2))
+plot(corr_s1_mask, main = "SPEI1 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_s3_mask, main = "SPEI3 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_s6_mask, main = "SPEI6 masked")
+plot(both, add=TRUE, lwd=2)
+plot(corr_s12_mask, main = "SPEI12 masked")
+plot(both, add=TRUE, lwd=2)
+```
+
+
+CORRELATION OF OTHER VARIABLES (tmax, tmin, ppt)
+
+
+PREPARING RASTERSTACKS
+
+TMAX 
+```{r}
+tmax_real_list = list()
+tmax_fore_list = list()
+
+grid_fore_tmax <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_tmax <- expand.grid(lon=lon_real, lat=lat_real)
+
+for (i in seq(1, length(time_fore))) #same as july_fore
+{
+  #forecast
+  grid_fore_tmax$z<-as.numeric(tmax_fore_array[,,i])
+  tmax_fore_raster<-rasterFromXYZ(grid_fore_tmax,crs=4321)
+  tmax_fore_list <- append(tmax_fore_list, tmax_fore_raster)
+  
+  #real
+  grid_real_tmax$z<-as.numeric(tmax_real_array[,,i])
+  tmax_real_raster<-rasterFromXYZ(grid_real_tmax,crs=4321)
+  tmax_real_r2 <- resample(tmax_real_raster, tmax_fore_raster, method='bilinear')
+  tmax_real_list <- append(tmax_real_list, tmax_real_r2)
+}
+
+real_tmax_stack <- stack(tmax_real_list)
+fore_tmax_stack <- stack(tmax_fore_list)
+plot(real_tmax_stack)
+plot(fore_tmax_stack)
+```
+
+TMIN
+```{r}
+tmin_real_list = list()
+tmin_fore_list = list()
+
+grid_fore_tmin <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_tmin <- expand.grid(lon=lon_real, lat=lat_real)
+
+for (i in seq(1, length(time_fore))) #same as july_fore
+{
+  #forecast
+  grid_fore_tmin$z<-as.numeric(tmin_fore_array[,,i])
+  tmin_fore_raster<-rasterFromXYZ(grid_fore_tmin,crs=4321)
+  tmin_fore_list <- append(tmin_fore_list, tmin_fore_raster)
+  
+  #real
+  grid_real_tmin$z<-as.numeric(tmin_real_array[,,i])
+  tmin_real_raster<-rasterFromXYZ(grid_real_tmin,crs=4321)
+  tmin_real_r2 <- resample(tmin_real_raster, tmin_fore_raster, method='bilinear')
+  tmin_real_list <- append(tmin_real_list, tmin_real_r2)
+}
+
+real_tmin_stack <- stack(tmin_real_list)
+fore_tmin_stack <- stack(tmin_fore_list)
+plot(real_tmin_stack)
+plot(fore_tmin_stack)
+```
+
+PPT
+```{r}
+ppt_real_list = list()
+ppt_fore_list = list()
+
+grid_fore_ppt <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_ppt <- expand.grid(lon=lon_real, lat=lat_real)
+
+for (i in seq(1, length(time_fore))) #same as july_fore
+{
+  #forecast
+  grid_fore_ppt$z<-as.numeric(ppt_fore_array[,,i])
+  ppt_fore_raster<-rasterFromXYZ(grid_fore_ppt,crs=4321)
+  ppt_fore_list <- append(ppt_fore_list, ppt_fore_raster)
+  
+  #real
+  grid_real_ppt$z<-as.numeric(ppt_real_array[,,i])
+  ppt_real_raster<-rasterFromXYZ(grid_real_ppt,crs=4321)
+  ppt_real_r2 <- resample(ppt_real_raster, ppt_fore_raster, method='bilinear')
+  ppt_real_list <- append(ppt_real_list, ppt_real_r2)
+}
+
+real_ppt_stack <- stack(ppt_real_list)
+fore_ppt_stack <- stack(ppt_fore_list)
+plot(real_ppt_stack)
+plot(fore_ppt_stack)
+```
+
+CORRELATION
+
+TMAX
+```{r}
+#pearson
+corr_p_tmax <- corLocal(real_tmax_stack, fore_tmax_stack, method="pearson", test=TRUE)
+plot(corr_p_tmax)
+corr_p_tmax_mask <- mask(corr_p_tmax[[1]], corr_p_tmax[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_p_tmax_mask)
+plot(both, add=TRUE, lwd=2)
+
+#spearman
+corr_s_tmax <- corLocal(real_tmax_stack, fore_tmax_stack, method="spearman", test=TRUE)
+plot(corr_s_tmax)
+corr_s_tmax_mask <- mask(corr_s_tmax[[1]], corr_s_tmax[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_s_tmax_mask)
+plot(both, add=TRUE, lwd=2)
+```
+
+TMIN
+```{r}
+#pearson
+corr_p_tmin <- corLocal(real_tmin_stack, fore_tmin_stack, method="pearson", test=TRUE)
+plot(corr_p_tmin)
+corr_p_tmin_mask <- mask(corr_p_tmin[[1]], corr_p_tmin[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_p_tmin_mask)
+plot(both, add=TRUE, lwd=2)
+
+#spearman
+corr_s_tmin <- corLocal(real_tmin_stack, fore_tmin_stack, method="spearman", test=TRUE)
+plot(corr_s_tmin)
+corr_s_tmin_mask <- mask(corr_s_tmin[[1]], corr_s_tmin[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_s_tmin_mask)
+plot(both, add=TRUE, lwd=2)
+```
+
+PPT
+```{r}
+#pearson
+corr_p_ppt <- corLocal(real_ppt_stack, fore_ppt_stack, method="pearson", test=TRUE)
+plot(corr_p_ppt)
+corr_p_ppt_mask <- mask(corr_p_ppt[[1]], corr_p_ppt[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_p_ppt_mask)
+plot(both, add=TRUE, lwd=2)
+
+#spearman
+corr_s_ppt <- corLocal(real_ppt_stack, fore_ppt_stack, method="spearman", test=TRUE)
+plot(corr_s_ppt)
+corr_s_ppt_mask <- mask(corr_s_ppt[[1]], corr_s_ppt[[2]] < 0.05, maskvalue=FALSE)
+plot(corr_s_ppt_mask)
+plot(both, add=TRUE, lwd=2)
 ```

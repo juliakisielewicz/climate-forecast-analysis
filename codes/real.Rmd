@@ -318,8 +318,7 @@ levelplot(z ~ lon * lat, data=grid_real_pet, at=cuts, pretty=T, col.regions=(rev
 
 ```{r}
 library(beepr)
-beep(3)
-
+beep(6)
 ```
 
 SPEI
@@ -340,7 +339,7 @@ SPEI3_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
 for (i in 1:tmax_real_dim[1]){
 	for (j in 1:tmax_real_dim[2]){
 		print(i)
-		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 3)) #1 month
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 3)) #3 months
 		SPEI3_real[i,j,]<-as.vector(a$fitted)		
 	}
 }
@@ -363,7 +362,7 @@ SPEI12_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
 for (i in 1:tmax_real_dim[1]){
 	for (j in 1:tmax_real_dim[2]){
 		print(i)
-		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 12)) #1 month
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 12)) #12 months
 		SPEI12_real[i,j,]<-as.vector(a$fitted)		
 	}
 }
@@ -388,7 +387,9 @@ for (i in july_real)
   
   spei6_real_raster<-rasterFromXYZ(grid_real_spei6,crs=4326)
   
-  plot(spei6_real_raster,main= paste("6-month SPEI based on real data - ", time_real[i]),col=pal(12),breaks=cuts)
+  writeRaster(spei6_real_raster, paste("./rasters/real_", unlist(strsplit(toString(time_real[i]), " "))[2], ".tif", sep=''), format="GTiff")
+  
+  #plot(spei6_real_raster,main= paste("6-month SPEI based on real data - ", time_real[i]),col=pal(12),breaks=cuts)
   #plot(both,add=TRUE,lwd=2)
   
   ## crop and mask

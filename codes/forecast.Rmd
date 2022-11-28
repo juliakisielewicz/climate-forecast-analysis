@@ -501,16 +501,18 @@ for (i in july_fore)
 
   spei6_fore_raster<-rasterFromXYZ(grid_fore_spei6,crs=4326)
   
+  writeRaster(spei6_fore_raster, paste("./rasters/forecast_", unlist(strsplit(toString(time_fore[i]), " "))[2], ".tif", sep=''), format="GTiff")
+  
   #plot(spei_fore_raster,main=paste("6-month SPEI based on forecasted data - ", time_real[i]),col=pal(12),breaks=cuts)
   #plot(both,add=TRUE,lwd=2)
   
   ## crop and mask
-  ex <- extent(as_Spatial(both))
-  spei6_fore_r_cropped <- crop(spei6_fore_raster, ex)
-  spei6_fore_r_masked <- mask(spei6_fore_r_cropped, as_Spatial(both))
+  #ex <- extent(as_Spatial(both))
+  #spei6_fore_r_cropped <- crop(spei6_fore_raster, ex)
+  #spei6_fore_r_masked <- mask(spei6_fore_r_cropped, as_Spatial(both))
 
-  plot(spei6_fore_r_masked, main=paste("6-month SPEI based on forecasted data - ", time_real[i]), col=pal(12), breaks=cuts)
-  plot(as_Spatial(both), add=TRUE, lwd=2)
+  #plot(spei6_fore_r_masked, main=paste("6-month SPEI based on forecasted data - ", time_real[i]), col=pal(12), breaks=cuts)
+  #plot(as_Spatial(both), add=TRUE, lwd=2)
 }
 ```
 
