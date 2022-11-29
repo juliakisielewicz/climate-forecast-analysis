@@ -609,60 +609,125 @@ plot(real_tmax_stack)
 plot(fore_tmax_stack)
 ```
 
+TMAX 
+```{r}
+
+grid_fore_tmax <- expand.grid(lon=lon_fore, lat=lat_fore)
+grid_real_tmax <- expand.grid(lon=lon_real, lat=lat_real)
+
+tmax_real_stacks <- c()
+tmax_fore_stacks <- c()
+
+for (i in seq(1,12))
+{
+  tmax_real_list = list()
+  tmax_fore_list = list()
+
+  monthly <- seq(i, length(time_fore), by=12)
+  print(monthly)
+  for (i in monthly) #same as july_fore
+  {
+    #forecast
+    grid_fore_tmax$z<-as.numeric(tmax_fore_array[,,i])
+    tmax_fore_raster<-rasterFromXYZ(grid_fore_tmax,crs=4321)
+    tmax_fore_list <- append(tmax_fore_list, tmax_fore_raster)
+    
+    #real
+    grid_real_tmax$z<-as.numeric(tmax_real_array[,,i])
+    tmax_real_raster<-rasterFromXYZ(grid_real_tmax,crs=4321)
+    tmax_real_r2 <- resample(tmax_real_raster, tmax_fore_raster, method='bilinear')
+    tmax_real_list <- append(tmax_real_list, tmax_real_r2)
+  }
+    
+  real_tmax_stack <- stack(tmax_real_list)
+  fore_tmax_stack <- stack(tmax_fore_list)
+  plot(real_tmax_stack)
+  plot(fore_tmax_stack)
+  tmax_real_stacks <- append(tmax_real_stacks, real_tmax_stack)
+  tmax_fore_stacks <- append(tmax_fore_stacks, fore_tmax_stack)
+}
+
+
+```
+
+
+
 TMIN
 ```{r}
-tmin_real_list = list()
-tmin_fore_list = list()
-
 grid_fore_tmin <- expand.grid(lon=lon_fore, lat=lat_fore)
 grid_real_tmin <- expand.grid(lon=lon_real, lat=lat_real)
 
-for (i in seq(1, length(time_fore))) #same as july_fore
+tmin_real_stacks <- c()
+tmin_fore_stacks <- c()
+
+for (i in seq(1,12))
 {
-  #forecast
-  grid_fore_tmin$z<-as.numeric(tmin_fore_array[,,i])
-  tmin_fore_raster<-rasterFromXYZ(grid_fore_tmin,crs=4321)
-  tmin_fore_list <- append(tmin_fore_list, tmin_fore_raster)
-  
-  #real
-  grid_real_tmin$z<-as.numeric(tmin_real_array[,,i])
-  tmin_real_raster<-rasterFromXYZ(grid_real_tmin,crs=4321)
-  tmin_real_r2 <- resample(tmin_real_raster, tmin_fore_raster, method='bilinear')
-  tmin_real_list <- append(tmin_real_list, tmin_real_r2)
+  tmin_real_list = list()
+  tmin_fore_list = list()
+
+  monthly <- seq(i, length(time_fore), by=12)
+  print(monthly)
+  for (i in monthly) #same as july_fore
+  {
+    #forecast
+    grid_fore_tmin$z<-as.numeric(tmin_fore_array[,,i])
+    tmin_fore_raster<-rasterFromXYZ(grid_fore_tmin,crs=4321)
+    tmin_fore_list <- append(tmin_fore_list, tmin_fore_raster)
+    
+    #real
+    grid_real_tmin$z<-as.numeric(tmin_real_array[,,i])
+    tmin_real_raster<-rasterFromXYZ(grid_real_tmin,crs=4321)
+    tmin_real_r2 <- resample(tmin_real_raster, tmin_fore_raster, method='bilinear')
+    tmin_real_list <- append(tmin_real_list, tmin_real_r2)
+  }
+    
+  real_tmin_stack <- stack(tmin_real_list)
+  fore_tmin_stack <- stack(tmin_fore_list)
+  plot(real_tmin_stack)
+  plot(fore_tmin_stack)
+  tmin_real_stacks <- append(tmin_real_stacks, real_tmin_stack)
+  tmin_fore_stacks <- append(tmin_fore_stacks, fore_tmin_stack)
 }
 
-real_tmin_stack <- stack(tmin_real_list)
-fore_tmin_stack <- stack(tmin_fore_list)
-plot(real_tmin_stack)
-plot(fore_tmin_stack)
 ```
 
 PPT
 ```{r}
-ppt_real_list = list()
-ppt_fore_list = list()
-
 grid_fore_ppt <- expand.grid(lon=lon_fore, lat=lat_fore)
 grid_real_ppt <- expand.grid(lon=lon_real, lat=lat_real)
 
-for (i in seq(1, length(time_fore))) #same as july_fore
+ppt_real_stacks <- c()
+ppt_fore_stacks <- c()
+
+for (i in seq(1,12))
 {
-  #forecast
-  grid_fore_ppt$z<-as.numeric(ppt_fore_array[,,i])
-  ppt_fore_raster<-rasterFromXYZ(grid_fore_ppt,crs=4321)
-  ppt_fore_list <- append(ppt_fore_list, ppt_fore_raster)
-  
-  #real
-  grid_real_ppt$z<-as.numeric(ppt_real_array[,,i])
-  ppt_real_raster<-rasterFromXYZ(grid_real_ppt,crs=4321)
-  ppt_real_r2 <- resample(ppt_real_raster, ppt_fore_raster, method='bilinear')
-  ppt_real_list <- append(ppt_real_list, ppt_real_r2)
+  ppt_real_list = list()
+  ppt_fore_list = list()
+
+  monthly <- seq(i, length(time_fore), by=12)
+  print(monthly)
+  for (i in monthly) #same as july_fore
+  {
+    #forecast
+    grid_fore_ppt$z<-as.numeric(ppt_fore_array[,,i])
+    ppt_fore_raster<-rasterFromXYZ(grid_fore_ppt,crs=4321)
+    ppt_fore_list <- append(ppt_fore_list, ppt_fore_raster)
+    
+    #real
+    grid_real_ppt$z<-as.numeric(ppt_real_array[,,i])
+    ppt_real_raster<-rasterFromXYZ(grid_real_ppt,crs=4321)
+    ppt_real_r2 <- resample(ppt_real_raster, ppt_fore_raster, method='bilinear')
+    ppt_real_list <- append(ppt_real_list, ppt_real_r2)
+  }
+    
+  real_ppt_stack <- stack(ppt_real_list)
+  fore_ppt_stack <- stack(ppt_fore_list)
+  plot(real_ppt_stack)
+  plot(fore_ppt_stack)
+  ppt_real_stacks <- append(ppt_real_stacks, real_ppt_stack)
+  ppt_fore_stacks <- append(ppt_fore_stacks, fore_ppt_stack)
 }
 
-real_ppt_stack <- stack(ppt_real_list)
-fore_ppt_stack <- stack(ppt_fore_list)
-plot(real_ppt_stack)
-plot(fore_ppt_stack)
 ```
 
 CORRELATION
@@ -670,50 +735,80 @@ CORRELATION
 TMAX
 ```{r}
 #pearson
-corr_p_tmax <- corLocal(real_tmax_stack, fore_tmax_stack, method="pearson", test=TRUE)
-plot(corr_p_tmax)
-corr_p_tmax_mask <- mask(corr_p_tmax[[1]], corr_p_tmax[[2]] < 0.05, maskvalue=FALSE)
-plot(corr_p_tmax_mask)
-plot(both, add=TRUE, lwd=2)
+corrs_p_tmax <- c()
+for (i in seq(1,12))
+{
+  corrs_p_tmax <- append(corrs_p_tmax, corLocal(tmax_real_stacks[i][[1]], tmax_fore_stacks[i][[1]], method="pearson", test=TRUE))
+plot(corrs_p_tmax[i][[1]])
+#corr_p_tmax_mask <- mask(corrs_p_tmax[i][[1]], corrs_p_tmax[i][[2]] < 0.05, maskvalue=FALSE)
+#plot(corr_p_tmax_mask)
+#plot(both, add=TRUE, lwd=2)
+}
+
 
 #spearman
-corr_s_tmax <- corLocal(real_tmax_stack, fore_tmax_stack, method="spearman", test=TRUE)
-plot(corr_s_tmax)
-corr_s_tmax_mask <- mask(corr_s_tmax[[1]], corr_s_tmax[[2]] < 0.05, maskvalue=FALSE)
-plot(corr_s_tmax_mask)
-plot(both, add=TRUE, lwd=2)
+corrs_s_tmax <- c()
+for (i in seq(1,12))
+{
+  corrs_s_tmax <- append(corrs_s_tmax, corLocal(tmax_real_stacks[i][[1]], tmax_fore_stacks[i][[1]], method="spearman", test=TRUE))
+plot(corrs_s_tmax[i][[1]])
+#corr_p_tmax_mask <- mask(corrs_p_tmax[i][[1]], corrs_p_tmax[i][[2]] < 0.05, maskvalue=FALSE)
+#plot(corr_p_tmax_mask)
+#plot(both, add=TRUE, lwd=2)
+}
+
 ```
 
 TMIN
 ```{r}
 #pearson
-corr_p_tmin <- corLocal(real_tmin_stack, fore_tmin_stack, method="pearson", test=TRUE)
-plot(corr_p_tmin)
-corr_p_tmin_mask <- mask(corr_p_tmin[[1]], corr_p_tmin[[2]] < 0.05, maskvalue=FALSE)
-plot(corr_p_tmin_mask)
-plot(both, add=TRUE, lwd=2)
+corrs_p_tmin <- c()
+for (i in seq(1,12))
+{
+  corrs_p_tmin <- append(corrs_p_tmin, corLocal(tmin_real_stacks[i][[1]], tmin_fore_stacks[i][[1]], method="pearson", test=TRUE))
+plot(corrs_p_tmin[i][[1]])
+#corr_p_tmin_mask <- mask(corrs_p_tmin[i][[1]], corrs_p_tmin[i][[2]] < 0.05, maskvalue=FALSE)
+#plot(corr_p_tmin_mask)
+#plot(both, add=TRUE, lwd=2)
+}
+
 
 #spearman
-corr_s_tmin <- corLocal(real_tmin_stack, fore_tmin_stack, method="spearman", test=TRUE)
-plot(corr_s_tmin)
-corr_s_tmin_mask <- mask(corr_s_tmin[[1]], corr_s_tmin[[2]] < 0.05, maskvalue=FALSE)
-plot(corr_s_tmin_mask)
-plot(both, add=TRUE, lwd=2)
+corrs_s_tmin <- c()
+for (i in seq(1,12))
+{
+  corrs_s_tmin <- append(corrs_s_tmin, corLocal(tmin_real_stacks[i][[1]], tmin_fore_stacks[i][[1]], method="spearman", test=TRUE))
+plot(corrs_s_tmin[i][[1]])
+#corr_p_tmin_mask <- mask(corrs_p_tmin[i][[1]], corrs_p_tmin[i][[2]] < 0.05, maskvalue=FALSE)
+#plot(corr_p_tmin_mask)
+#plot(both, add=TRUE, lwd=2)
+}
+
 ```
 
 PPT
 ```{r}
 #pearson
-corr_p_ppt <- corLocal(real_ppt_stack, fore_ppt_stack, method="pearson", test=TRUE)
-plot(corr_p_ppt)
-corr_p_ppt_mask <- mask(corr_p_ppt[[1]], corr_p_ppt[[2]] < 0.05, maskvalue=FALSE)
-plot(corr_p_ppt_mask)
-plot(both, add=TRUE, lwd=2)
+corrs_p_ppt <- c()
+for (i in seq(1,12))
+{
+  corrs_p_ppt <- append(corrs_p_ppt, corLocal(ppt_real_stacks[i][[1]], ppt_fore_stacks[i][[1]], method="pearson", test=TRUE))
+plot(corrs_p_ppt[i][[1]])
+#corr_p_ppt_mask <- mask(corrs_p_ppt[i][[1]], corrs_p_ppt[i][[2]] < 0.05, maskvalue=FALSE)
+#plot(corr_p_ppt_mask)
+#plot(both, add=TRUE, lwd=2)
+}
+
 
 #spearman
-corr_s_ppt <- corLocal(real_ppt_stack, fore_ppt_stack, method="spearman", test=TRUE)
-plot(corr_s_ppt)
-corr_s_ppt_mask <- mask(corr_s_ppt[[1]], corr_s_ppt[[2]] < 0.05, maskvalue=FALSE)
-plot(corr_s_ppt_mask)
-plot(both, add=TRUE, lwd=2)
+corrs_s_ppt <- c()
+for (i in seq(1,12))
+{
+  corrs_s_ppt <- append(corrs_s_ppt, corLocal(ppt_real_stacks[i][[1]], ppt_fore_stacks[i][[1]], method="spearman", test=TRUE))
+plot(corrs_s_ppt[i][[1]])
+#corr_p_ppt_mask <- mask(corrs_p_ppt[i][[1]], corrs_p_ppt[i][[2]] < 0.05, maskvalue=FALSE)
+#plot(corr_p_ppt_mask)
+#plot(both, add=TRUE, lwd=2)
+}
+
 ```
