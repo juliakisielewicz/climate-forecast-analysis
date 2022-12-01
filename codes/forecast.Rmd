@@ -381,9 +381,8 @@ kg m-2 s-1 to mm convertion
 sec_per_day <- 86400
 
 for (i in 1 : length(time_fore)) {
-    ppt_fore_array[,,i] <- ppt_fore_array[,,i] * sec_per_day * days_in_month(time_fore[i])
+  ppt_fore_array[,,i] <- ppt_fore_array[,,i] * sec_per_day * days_in_month(time_fore[i])
 }
-
 
 summary(ppt_fore_array)
 summary(ppt_real_array)
@@ -413,11 +412,11 @@ PET_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 
 for (i in 1 : tmax_fore_dim[1])
 {
-    for (j in 1 : tmax_fore_dim[2])
-    {
-        print(i)
-        PET_fore[i,j,] <- hargreaves(tmin_fore_array[i,j,], tmax_fore_array[i,j,], lat=lat_fore[j])
-    }
+  print(i)
+  for (j in 1 : tmax_fore_dim[2])
+  {
+      PET_fore[i,j,] <- hargreaves(tmin_fore_array[i,j,], tmax_fore_array[i,j,], lat=lat_fore[j])
+  }
 }
 
 
@@ -439,47 +438,47 @@ SPEI
 SPEI1_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 
 for (i in 1:tmax_fore_dim[1]){
+  print(i)
 	for (j in 1:tmax_fore_dim[2]){
-		print(i)
 		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 1)) #1 month
 		SPEI1_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
+#beep(3)
 
 SPEI3_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 
 for (i in 1:tmax_fore_dim[1]){
+  print(i)
 	for (j in 1:tmax_fore_dim[2]){
-		print(i)
-		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 3)) #1 month
+		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 3)) #3 months
 		SPEI3_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
+#beep(3)
 
 SPEI6_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 
 for (i in 1:tmax_fore_dim[1]){
+  print(i)
 	for (j in 1:tmax_fore_dim[2]){
-		print(i)
 		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 6)) #6 months
 		SPEI6_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
+#beep(3)
 
 
 SPEI12_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 
 for (i in 1:tmax_fore_dim[1]){
+  print(i)
 	for (j in 1:tmax_fore_dim[2]){
-		print(i)
-		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 12)) #1 month
+		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 12)) #12 months
 		SPEI12_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
+#beep(3)
 
 
 ```
@@ -501,7 +500,7 @@ for (i in july_fore)
 
   spei6_fore_raster<-rasterFromXYZ(grid_fore_spei6,crs=4326)
   
-  writeRaster(spei6_fore_raster, paste("./rasters/forecast_", unlist(strsplit(toString(time_fore[i]), " "))[2], ".tif", sep=''), format="GTiff")
+  #writeRaster(spei6_fore_raster, paste("./rasters/forecast_", unlist(strsplit(toString(time_fore[i]), " "))[2], ".tif", sep=''), format="GTiff")
   
   #plot(spei_fore_raster,main=paste("6-month SPEI based on forecasted data - ", time_real[i]),col=pal(12),breaks=cuts)
   #plot(both,add=TRUE,lwd=2)
@@ -517,8 +516,6 @@ for (i in july_fore)
 ```
 
 
-
-
-
 ```{r}
+save(list=c("both", "north", "south", "pol", "july", "lat_fore", "lon_fore", "lat_real", "lon_real", "PET_fore", "PET_real", "ppt_fore_array", "ppt_real_array", "SPEI1_fore", "SPEI1_real", "SPEI3_fore", "SPEI3_real", "SPEI6_fore", "SPEI6_real", "SPEI12_fore", "SPEI12_real", "time_fore", "time_real", "tmax_fore_array", "tmax_real_array", "tmin_fore_array", "tmin_real_array"), file="manual_real_fore.RData")
 ```

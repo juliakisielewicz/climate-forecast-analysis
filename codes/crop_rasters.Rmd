@@ -1,0 +1,77 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "D:/AGH/INZ/data")
+```
+
+#function for running external .Rmd files
+```{r}
+source_rmd = function(file, ...) {
+  tmp_file = tempfile(fileext=".R")
+  on.exit(unlink(tmp_file), add = TRUE)
+  knitr::purl(file, output=tmp_file)
+  source(file = tmp_file, ...)
+}
+```
+
+```{r}
+load("manual_real_fore_rasters_correlation.RData")
+source_rmd("D:/AGH/INZ/codes/shapefiles.Rmd")
+Sys.setlocale("LC_TIME", "C")
+```
+
+
+```{r}
+
+#crop and mask rasters
+ex <- extent(as_Spatial(both))
+
+crop_mask <- function(a) { #input: rasterstack
+  r_list <- list()
+  for (i in seq(1, length(names(a))))
+  {
+    print(i)
+    y <- a[[i]]
+    y <- crop(y, ex)
+    y <- mask(y, as_Spatial(both))
+    r_list <- append(r_list, y)
+  }
+  return(stack(r_list))  
+}
+
+spei <- c()
+for (i in seq(1,2))
+{
+  for (j in seq(1,4))
+  {
+    spei <- append(spei, crop_mask(spei_rasters[j,i][[1]])) 
+  }
+}
+
+#save in new data.frame
+spei_rasters_cropped <- data.frame(matrix(spei, nrow=4, ncol=2))
+colnames(spei_rasters_cropped) <- c("real", "forecast")
+rownames(spei_rasters_cropped) <- c(1,3,6,12)
+
+#visualize
+pal <- colorRampPalette(c("red","blue"))
+cuts<-seq(-3,3,0.5)
+
+```
+
+
+```{r}
+
+save(list=c("both", "north", "south", "pol", "july", "lat_fore", "lon_fore", 
+"lat_real", "lon_real", "PET_fore", "PET_real", "ppt_fore_array", "ppt_real_array", 
+"SPEI1_fore", "SPEI1_real", "SPEI3_fore", "SPEI3_real", "SPEI6_fore", "SPEI6_real", 
+"SPEI12_fore", "SPEI12_real", "time_fore", "time_real", "tmax_fore_array", "tmax_real_array", 
+"tmin_fore_array", "tmin_real_array", "spei_rasters", "tmax_rasters", "tmin_rasters", "ppt_rasters",
+"correlation_spei", "correlation_tmax", "correlation_tmin", "correlation_ppt", "spei_rasters_cropped", "pal", "cuts"), file="manual_real_fore_ras_corr_crop.RData")
+
+
+````

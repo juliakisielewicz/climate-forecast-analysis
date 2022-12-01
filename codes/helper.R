@@ -597,3 +597,18 @@ x <- corLocal(real_spei6_stack, fore_spei6_stack, method="spearman", test=TRUE)
 plot(x)
 xm <- mask(x[[1]], x[[2]] < 0.05, maskvalue=FALSE)
 plot(xm)
+
+
+
+load("data/manual_real_fore_ras_corr_crop.RData")
+library(ggplot2)
+
+
+ggplot() +
+  geom_raster(data = spei_rasters_cropped[1,2][[1]][[1]] , aes(x = x, y = y,
+                                       fill = z)) + 
+  scale_fill_manual(values = pal(12)) + 
+  coord_quickmap()
+
+ggplot() +
+  geom_raster(spei_rasters_cropped[1,2][[1]][[1]])
