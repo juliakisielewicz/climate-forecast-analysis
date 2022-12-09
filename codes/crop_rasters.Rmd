@@ -57,9 +57,18 @@ spei_rasters_cropped <- data.frame(matrix(spei, nrow=4, ncol=2))
 colnames(spei_rasters_cropped) <- c("real", "forecast")
 rownames(spei_rasters_cropped) <- c(1,3,6,12)
 
+```
+
+
+```{r}
 #visualize
 pal <- colorRampPalette(c("red","blue"))
 cuts<-seq(-3,3,0.5)
+
+cuts_c <- seq(-1, 1, by=0.2)
+cuts_cp <- seq(0, 1, by=0.1)
+pal_c <- colorRampPalette(c("blue","white", "red"))
+pal_cp <- colorRampPalette(c("green", "white"))
 
 ```
 
@@ -71,7 +80,7 @@ save(list=c("both", "north", "south", "pol", "july", "lat_fore", "lon_fore",
 "SPEI1_fore", "SPEI1_real", "SPEI3_fore", "SPEI3_real", "SPEI6_fore", "SPEI6_real", 
 "SPEI12_fore", "SPEI12_real", "time_fore", "time_real", "tmax_fore_array", "tmax_real_array", 
 "tmin_fore_array", "tmin_real_array", "spei_rasters", "tmax_rasters", "tmin_rasters", "ppt_rasters",
-"correlation_spei", "correlation_tmax", "correlation_tmin", "correlation_ppt", "spei_rasters_cropped", "pal", "cuts"), file="manual_real_fore_ras_corr_crop.RData")
+"correlation_spei", "correlation_tmax", "correlation_tmin", "correlation_ppt", "spei_rasters_cropped", "pal", "cuts", "pal_c", "cuts_c", "pal_cp", "cuts_cp"), file="manual_real_fore_ras_corr_crop.RData")
 
 
-````
+```
