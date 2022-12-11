@@ -27,7 +27,7 @@ pal_cp <- colorRampPalette(c("#d73027", "white"))
 
 
 
-ui <- fluidPage(id = 'test',
+ui <- dashboardPage(id = 'test',
                 tags$style('#test {
                              background-color: #E9EDDE;
                              color: #662020;
