@@ -20,7 +20,7 @@ source_rmd = function(file, ...) {
 
 LOADING SAVED WORKSPACE
 ```{r}
-load("manual_real_fore.RData")
+load("manual_real_fore_full.RData")
 source_rmd("D:/AGH/INZ/codes/shapefiles.Rmd")
 Sys.setlocale("LC_TIME", "C")
 ```
@@ -384,7 +384,7 @@ save(list=c("both", "north", "south", "pol", "july", "lat_fore", "lon_fore",
 "lat_real", "lon_real", "PET_fore", "PET_real", "ppt_fore_array", "ppt_real_array", 
 "SPEI1_fore", "SPEI1_real", "SPEI3_fore", "SPEI3_real", "SPEI6_fore", "SPEI6_real", 
 "SPEI12_fore", "SPEI12_real", "time_fore", "time_real", "tmax_fore_array", "tmax_real_array", 
-"tmin_fore_array", "tmin_real_array", "spei_rasters", "tmax_rasters", "tmin_rasters", "ppt_rasters"), file="manual_real_fore_rasters.RData")
+"tmin_fore_array", "tmin_real_array", "spei_rasters", "tmax_rasters", "tmin_rasters", "ppt_rasters"), file="manual_real_fore_ras_full.RData")
 
 
-````
+```

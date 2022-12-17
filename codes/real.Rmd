@@ -31,9 +31,9 @@ Loading data
 ```{r}
 #setwd("D:/AGH/INZ/data")
 
-ncin_real_ppt<-nc_open("real/agg_terraclimate_ppt_1958_CurrentYear_GLOBE.nc")
-ncin_real_tmax<-nc_open("real/agg_terraclimate_tmax_1958_CurrentYear_GLOBE.nc")
-ncin_real_tmin<-nc_open("real/agg_terraclimate_tmin_1958_CurrentYear_GLOBE.nc")
+ncin_real_ppt<-nc_open("real/1agg_terraclimate_ppt_1958_CurrentYear_GLOBE.nc")
+ncin_real_tmax<-nc_open("real/1agg_terraclimate_tmax_1958_CurrentYear_GLOBE.nc")
+ncin_real_tmin<-nc_open("real/1agg_terraclimate_tmin_1958_CurrentYear_GLOBE.nc")
 ```
 
 ## MAX TEMPERATURE
@@ -267,7 +267,7 @@ rm(lon_real_ppt, lat_real_ppt, time_real_ppt)
 ppt_real_array <- ncvar_get(ncin_real_ppt, "ppt")
 
 #NA values
-which(ppt_real_array == "NA")
+which(ppt_real_array == NA)
 #integer(0) <- no need to modify 
 
 ```
@@ -300,7 +300,7 @@ for (i in 1 : tmax_real_dim[1])
     for (j in 1 : tmax_real_dim[2])
     {
         print(i)
-        PET_real[i,j,] <- hargreaves(tmin_real_array[i,j,], tmax_real_array[i,j,], lat=lat_real[j])
+        PET_real[i,j,] <- hargreaves(tmin_real_array[i,j,], tmax_real_array[i,j,], lat=lat_real[j], na.rm = TRUE)
     }
 }
 
@@ -328,33 +328,33 @@ SPEI1_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
 for (i in 1:tmax_real_dim[1]){
   print(i)
 	for (j in 1:tmax_real_dim[2]){
-		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 1)) #1 month
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 1, na.rm = TRUE)) #1 month
 		SPEI1_real[i,j,]<-as.vector(a$fitted)		
 	}
 }
-#beep(3)
+beep(3)
 
 SPEI3_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
 
 for (i in 1:tmax_real_dim[1]){
   print(i)
 	for (j in 1:tmax_real_dim[2]){
-		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 3)) #3 months
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 3, na.rm = TRUE)) #3 months
 		SPEI3_real[i,j,]<-as.vector(a$fitted)		
 	}
 }
-#beep(3)
+beep(3)
 
 SPEI6_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
 
 for (i in 1:tmax_real_dim[1]){
   print(i)
 	for (j in 1:tmax_real_dim[2]){
-		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 6)) #6 months
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 6, na.rm = TRUE)) #6 months
 		SPEI6_real[i,j,]<-as.vector(a$fitted)		
 	}
 }
-#beep(3)
+beep(3)
 
 
 SPEI12_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
@@ -362,11 +362,11 @@ SPEI12_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
 for (i in 1:tmax_real_dim[1]){
   print(i)
 	for (j in 1:tmax_real_dim[2]){
-		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 12)) #12 months
+		a<-as.vector(spei( as.numeric(ppt_real_array[i,j,]) - as.numeric(PET_real[i,j,]), 12, na.rm = TRUE)) #12 months
 		SPEI12_real[i,j,]<-as.vector(a$fitted)		
 	}
 }
-#beep(3)
+beep(3)
 
 
 ```
@@ -389,8 +389,8 @@ for (i in july_real)
   
   #writeRaster(spei6_real_raster, paste("./rasters/real_", unlist(strsplit(toString(time_real[i]), " "))[2], ".tif", sep=''), format="GTiff")
   
-  #plot(spei6_real_raster,main= paste("6-month SPEI based on real data - ", time_real[i]),col=pal(12),breaks=cuts)
-  #plot(both,add=TRUE,lwd=2)
+  plot(spei6_real_raster,main= paste("6-month SPEI based on real data - ", time_real[i]),col=pal(12),breaks=cuts)
+  plot(both,add=TRUE,lwd=2)
   
   ## crop and mask
   #ex <- extent(as_Spatial(both))

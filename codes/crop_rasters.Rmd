@@ -19,7 +19,7 @@ source_rmd = function(file, ...) {
 ```
 
 ```{r}
-load("manual_real_fore_rasters_correlation.RData")
+load("../codes/shiny_d/data/manual_data.RData")
 source_rmd("D:/AGH/INZ/codes/shapefiles.Rmd")
 Sys.setlocale("LC_TIME", "C")
 ```
@@ -28,27 +28,104 @@ Sys.setlocale("LC_TIME", "C")
 ```{r}
 
 #crop and mask rasters
-ex <- extent(as_Spatial(both))
 
-crop_mask <- function(a) { #input: rasterstack
+crop_mask <- function(a, shape) { #input: rasterstack
+  ex <- extent(as_Spatial(shape))
   r_list <- list()
   for (i in seq(1, length(names(a))))
   {
     print(i)
     y <- a[[i]]
-    y <- crop(y, ex)
-    y <- mask(y, as_Spatial(both))
+    y <- crop(y, ex,)
+    y <- mask(y, as_Spatial(shape))
     r_list <- append(r_list, y)
   }
   return(stack(r_list))  
 }
+
+```
+
+```{r}
+
+
+corr_spei <- c()
+for (i in seq(1,2))
+{
+  for (j in seq(1,4))
+  {
+    corr_spei <- append(corr_spei, crop_mask(correlation_spei[j,i][[1]], pol)) 
+  }
+}
+
+#save in new data.frame
+correlation_spei_cropped <- data.frame(matrix(corr_spei, nrow=4, ncol=2))
+colnames(correlation_spei_cropped) <- c("pearson", "spearman")
+rownames(correlation_spei_cropped) <- c(1,3,6,12)
+
+
+
+
+
+corr_tmax <- c()
+for (i in seq(1,2))
+{
+  for (j in seq(1,12))
+  {
+    corr_tmax <- append(corr_tmax, crop_mask(correlation_tmax[j,i][[1]], pol)) 
+  }
+}
+
+#save in new data.frame
+correlation_tmax_cropped <- data.frame(matrix(corr_tmax, nrow=12, ncol=2))
+colnames(correlation_tmax_cropped) <- c("pearson", "spearman")
+rownames(correlation_tmax_cropped) <- seq(1,12)
+
+
+
+corr_tmin <- c()
+for (i in seq(1,2))
+{
+  for (j in seq(1,12))
+  {
+    corr_tmin <- append(corr_tmin, crop_mask(correlation_tmin[j,i][[1]], pol)) 
+  }
+}
+
+#save in new data.frame
+correlation_tmin_cropped <- data.frame(matrix(corr_tmin, nrow=12, ncol=2))
+colnames(correlation_tmin_cropped) <- c("pearson", "spearman")
+rownames(correlation_tmin_cropped) <- seq(1,12)
+
+
+
+corr_ppt <- c()
+for (i in seq(1,2))
+{
+  for (j in seq(1,12))
+  {
+    corr_ppt <- append(corr_ppt, crop_mask(correlation_ppt[j,i][[1]], pol)) 
+  }
+}
+
+#save in new data.frame
+correlation_ppt_cropped <- data.frame(matrix(corr_ppt, nrow=12, ncol=2))
+colnames(correlation_ppt_cropped) <- c("pearson", "spearman")
+rownames(correlation_ppt_cropped) <- seq(1,12)
+
+
+
+
+```
+
+```{r}
+
 
 spei <- c()
 for (i in seq(1,2))
 {
   for (j in seq(1,4))
   {
-    spei <- append(spei, crop_mask(spei_rasters[j,i][[1]])) 
+    spei <- append(spei, crop_mask(spei_rasters[j,i][[1]], both)) 
   }
 }
 
@@ -58,7 +135,6 @@ colnames(spei_rasters_cropped) <- c("real", "forecast")
 rownames(spei_rasters_cropped) <- c(1,3,6,12)
 
 ```
-
 
 ```{r}
 #visualize
@@ -74,6 +150,9 @@ pal_cp <- colorRampPalette(c("green", "white"))
 
 
 ```{r}
+save(list=c("spei_rasters_cropped", "correlation_spei_cropped", "correlation_tmax_cropped", "correlation_tmin_cropped", "correlation_ppt_cropped", "pol", "both"), file = "manual_data1.RData")
+
+
 
 save(list=c("both", "north", "south", "pol", "july", "lat_fore", "lon_fore", 
 "lat_real", "lon_real", "PET_fore", "PET_real", "ppt_fore_array", "ppt_real_array", 

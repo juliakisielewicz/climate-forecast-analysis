@@ -612,3 +612,112 @@ ggplot() +
 
 ggplot() +
   geom_raster(spei_rasters_cropped[1,2][[1]][[1]])
+
+
+library(raster)
+library(SPEI)
+library(sp)
+
+which(abs(lon_real - 17.5) < 0.05)
+which(abs(lat_real - 52.5) < 0.05)
+
+lon_fore[88]
+lat_fore[64]
+july
+
+
+a<-spei( as.numeric(ppt_real_array[94,69,]) - as.numeric(PET_real[94,69,]), 1, na.rm = TRUE) #1 month
+b<-spei( as.numeric(ppt_real_array[94,69,]) - as.numeric(PET_real[94,69,]), 3, na.rm = TRUE) #3 month
+c<-spei( as.numeric(ppt_real_array[94,69,]) - as.numeric(PET_real[94,69,]), 6, na.rm = TRUE) #6 month
+d<-spei( as.numeric(ppt_real_array[94,69,]) - as.numeric(PET_real[94,69,]), 12, na.rm = TRUE) #12 month
+
+par(mfrow=c(4, 1))
+plot.spei(a, main="SPEI_1")
+plot.spei(b, main="SPEI_3")
+plot.spei(c, main="SPEI_6")
+plot.spei(d, main="SPEI_12")
+
+
+
+a_f<-spei( as.numeric(ppt_fore_array[94,69,]) - as.numeric(PET_fore[94,69,]), 1, na.rm = TRUE) #1 month
+b_f<-spei( as.numeric(ppt_fore_array[94,69,]) - as.numeric(PET_fore[94,69,]), 3, na.rm = TRUE) #3 month
+c_f<-spei( as.numeric(ppt_fore_array[94,69,]) - as.numeric(PET_fore[94,69,]), 6, na.rm = TRUE) #6 month
+d_f<-spei( as.numeric(ppt_fore_array[94,69,]) - as.numeric(PET_fore[94,69,]), 12, na.rm = TRUE) #12 month
+
+par(mfrow=c(4, 1))
+plot.spei(a_f, main="SPEI_1")
+plot.spei(b_f, main="SPEI_3")
+plot.spei(c_f, main="SPEI_6")
+plot.spei(d_f, main="SPEI_12")
+
+plot(pol, lwd=3, xlim=c(14, 24.3), ylim=c(48.2, 55), border = "black")
+plot(both, add=TRUE, lwd=3, xlim=c(14, 24.3), ylim=c(48.2, 55), border = "black")
+points(lon_real[94], lat_real[69])
+points(lon_fore[88], lat_fore[64])
+
+
+
+spei_rasters[1,1][[1]][[1]][88, 64]
+spei_rasters[1,2][[1]][[1]][88, 64]
+SPEI1_fore[88, 64, 19]
+
+
+#real
+r1<-spei_rasters[1,1][[1]][[1]] #my raster taken from a first layer of a stack
+r1lon<-r1lat<-r1 #copy r to rlon and rlat rasters [1]][1]which will contain the longitude and latitude
+xy1<-xyFromCell(r1,1:length(r1)) #matrix of logitudes (x) and latitudes(y)
+r1lon[]<-xy1[,1] #raster of longitudes
+r1lat[]<-xy1[,2] #raster of latitides
+par(mfrow=c(1,3))
+image(r1lon,main="longitudes")
+image(r1lat,main="latitudes")
+
+spei_rasters[1,1][[1]][[1]]
+r1lon[1,]
+r1lat[1]
+lon_real[1]
+lat_real[1]
+
+
+
+#fore
+r<-spei_rasters[1,2][[1]][[1]] #my raster taken from a first layer of a stack
+rlon<-rlat<-r #copy r to rlon and rlat rasters [1]][1]which will contain the longitude and latitude
+xy<-xyFromCell(r,1:length(r)) #matrix of logitudes (x) and latitudes(y)
+rlon[]<-xy[,1] #raster of longitudes
+rlat[]<-xy[,2] #raster of latitides
+par(mfrow=c(1,3))
+image(rlon,main="longitudes")
+points(rlon[88, 88], rlat[64, 88])
+points(rlon[88, 88], rlat[64, 88])
+image(rlat,main="latitudes")
+points(rlon[88, 88], rlat[64, 88])
+image(spei_rasters[1,2][[1]][[1]])
+points(rlon[88, 88], rlat[64, 88])
+
+
+spei_rasters[1,2][[1]][[1]]
+rlon[1]
+rlat[1]
+
+
+lon_fore[88]
+lat_fore[64]
+
+
+rlon[88,88]
+rlat[64,88]
+
+
+rlon[88,] == r1lon[88,]
+
+
+which(abs(r1lon[1,] - 17.5) < 0.05)
+which(abs(r1lat - 52.5) < 0.05)
+
+
+spei_rasters[1,2][[1]][[1]][88, 64]
+SPEI1_fore[, , 19]
+#lon64, lat88
+spei_rasters[1,1][[1]][[1]][88, 64]
+SPEI1_real[69, 94,19]

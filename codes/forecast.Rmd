@@ -128,10 +128,10 @@ lon_fore_min <- (as.numeric(ncatt_get(ncin_real_tmax, 0,"geospatial_lon_min")))[
 lon_fore_max <- (as.numeric(ncatt_get(ncin_real_tmax, 0,"geospatial_lon_max")))[2]
 
 #finding nearest gridpoint
-lon_fore_start <- which(abs(lon_fore - lon_fore_min) < 0.05)[1]
-lon_fore_end <- which(abs(lon_fore - lon_fore_max) < 0.05)[2]
-lat_fore_end <- which(abs(lat_fore - lat_fore_min) < 0.05)[2]
-lat_fore_start <- which(abs(lat_fore - lat_fore_max) < 0.05)[1]
+lon_fore_start <- which(abs(lon_fore - lon_fore_min) < 0.02)[1]
+lon_fore_end <- which(abs(lon_fore - lon_fore_max) < 0.02)[1]
+lat_fore_end <- which(abs(lat_fore - lat_fore_min) < 0.02)[1]
+lat_fore_start <- which(abs(lat_fore - lat_fore_max) < 0.023)[1]
 
 lat_fore[lat_fore_end]
 
@@ -233,10 +233,10 @@ lat_fore_max <- (as.numeric(ncatt_get(ncin_real_tmin, 0,"geospatial_lat_max")))[
 lon_fore_min <- (as.numeric(ncatt_get(ncin_real_tmin, 0,"geospatial_lon_min")))[2]
 lon_fore_max <- (as.numeric(ncatt_get(ncin_real_tmin, 0,"geospatial_lon_max")))[2]
 
-lon_fore_start <- which(abs(lon_fore_tmin - lon_fore_min) < 0.05)[1]
-lon_fore_end <- which(abs(lon_fore_tmin - lon_fore_max) < 0.05)[2]
-lat_fore_end <- which(abs(lat_fore_tmin - lat_fore_min) < 0.05)[2]
-lat_fore_start <- which(abs(lat_fore_tmin - lat_fore_max) < 0.05)[1]
+lon_fore_start <- which(abs(lon_fore_tmin - lon_fore_min) < 0.02)[1]
+lon_fore_end <- which(abs(lon_fore_tmin - lon_fore_max) < 0.02)[1]
+lat_fore_end <- which(abs(lat_fore_tmin - lat_fore_min) < 0.02)[1]
+lat_fore_start <- which(abs(lat_fore_tmin - lat_fore_max) < 0.023)[1]
 
 lat_fore_tmin[lat_fore_end]
 
@@ -415,7 +415,7 @@ for (i in 1 : tmax_fore_dim[1])
   print(i)
   for (j in 1 : tmax_fore_dim[2])
   {
-      PET_fore[i,j,] <- hargreaves(tmin_fore_array[i,j,], tmax_fore_array[i,j,], lat=lat_fore[j])
+      PET_fore[i,j,] <- hargreaves(tmin_fore_array[i,j,], tmax_fore_array[i,j,], lat=lat_fore[j], na.rm=TRUE)
   }
 }
 
@@ -440,33 +440,33 @@ SPEI1_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 for (i in 1:tmax_fore_dim[1]){
   print(i)
 	for (j in 1:tmax_fore_dim[2]){
-		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 1)) #1 month
+		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 1, na.rm = TRUE)) #1 month
 		SPEI1_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-#beep(3)
+beep(3)
 
 SPEI3_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 
 for (i in 1:tmax_fore_dim[1]){
   print(i)
 	for (j in 1:tmax_fore_dim[2]){
-		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 3)) #3 months
+		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 3, na.rm = TRUE)) #3 months
 		SPEI3_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-#beep(3)
+beep(3)
 
 SPEI6_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 
 for (i in 1:tmax_fore_dim[1]){
   print(i)
 	for (j in 1:tmax_fore_dim[2]){
-		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 6)) #6 months
+		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 6, na.rm = TRUE)) #6 months
 		SPEI6_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-#beep(3)
+beep(3)
 
 
 SPEI12_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
@@ -474,11 +474,11 @@ SPEI12_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 for (i in 1:tmax_fore_dim[1]){
   print(i)
 	for (j in 1:tmax_fore_dim[2]){
-		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 12)) #12 months
+		a<-as.vector(spei( as.numeric(ppt_fore_array[i,j,]) - as.numeric(PET_fore[i,j,]), 12, na.rm = TRUE)) #12 months
 		SPEI12_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-#beep(3)
+beep(3)
 
 
 ```
@@ -491,19 +491,22 @@ cuts<-seq(-3,3,0.5)
 
 #indexes of every july
 july_fore <- seq(7, length(time_fore), by=12)
-
+july <- july_fore
 for (i in july_fore)
 {
   
-  grid_fore_spei6 <- expand.grid(lon=lon_fore, lat=lat_fore)
-  grid_fore_spei6$z<-as.numeric(SPEI6_fore[,,i])
+  grid_fore_spei1 <- expand.grid(lon=lon_fore, lat=lat_fore)
+  grid_fore_spei1$z<-as.numeric(SPEI1_fore[,,19])
+  
+  levelplot(z ~ lon * lat, data=grid_fore_spei1, main = "Forecasted SPEI1 - July 2007")
+  
 
-  spei6_fore_raster<-rasterFromXYZ(grid_fore_spei6,crs=4326)
+  spei1_fore_raster<-rasterFromXYZ(grid_fore_spei1,crs=4326)
   
   #writeRaster(spei6_fore_raster, paste("./rasters/forecast_", unlist(strsplit(toString(time_fore[i]), " "))[2], ".tif", sep=''), format="GTiff")
   
-  #plot(spei_fore_raster,main=paste("6-month SPEI based on forecasted data - ", time_real[i]),col=pal(12),breaks=cuts)
-  #plot(both,add=TRUE,lwd=2)
+  plot(spei12_fore_raster,main=paste("6-month SPEI based on forecasted data - ", time_real[i]),col=pal(12),breaks=cuts)
+  plot(both,add=TRUE,lwd=2)
   
   ## crop and mask
   #ex <- extent(as_Spatial(both))
@@ -517,5 +520,5 @@ for (i in july_fore)
 
 
 ```{r}
-save(list=c("both", "north", "south", "pol", "july", "lat_fore", "lon_fore", "lat_real", "lon_real", "PET_fore", "PET_real", "ppt_fore_array", "ppt_real_array", "SPEI1_fore", "SPEI1_real", "SPEI3_fore", "SPEI3_real", "SPEI6_fore", "SPEI6_real", "SPEI12_fore", "SPEI12_real", "time_fore", "time_real", "tmax_fore_array", "tmax_real_array", "tmin_fore_array", "tmin_real_array"), file="manual_real_fore.RData")
+save(list=c("both", "north", "south", "pol", "july", "lat_fore", "lon_fore", "lat_real", "lon_real", "PET_fore", "PET_real", "ppt_fore_array", "ppt_real_array", "SPEI1_fore", "SPEI1_real", "SPEI3_fore", "SPEI3_real", "SPEI6_fore", "SPEI6_real", "SPEI12_fore", "SPEI12_real", "time_fore", "time_real", "tmax_fore_array", "tmax_real_array", "tmin_fore_array", "tmin_real_array"), file="manual_real_fore+full.RData")
 ```
