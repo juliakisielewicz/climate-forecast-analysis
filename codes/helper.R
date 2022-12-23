@@ -616,44 +616,195 @@ ggplot() +
 
 library(raster)
 library(SPEI)
-library(sp)
+library(sf)
 
 which(abs(lon_real - 17.5) < 0.05)
 which(abs(lat_real - 52.5) < 0.05)
+#95, 68
 
-lon_fore[88]
-lat_fore[64]
-july
+which(abs(lon_fore - 17.5) < 0.05)
+which(abs(lat_fore - 52.5) < 0.05)
+#88, 64
+
+a<-c( as.numeric(ppt_real_array[95,68,]) , as.numeric(PET_real[95,68,])) #1 month
+b<-c( as.numeric(ppt_real_array[95,68,]) , as.numeric(PET_real[95,68,])) #3 month
+c<-c( as.numeric(ppt_real_array[95,68,]) , as.numeric(PET_real[95,68,])) #6 month
+d<-c( as.numeric(ppt_real_array[95,68,]) , as.numeric(PET_real[95,68,])) #12 month
+
+#par(mfrow=c(4, 1))
+#plot.spei(north_real[1], main="SPEI_1")
+#plot.spei(b, main="SPEI_3")
+#plot.spei(c, main="SPEI_6")
+#plot.spei(d, main="SPEI_12")
+
+a_f<-c( as.numeric(ppt_fore_array[88,64,]) , as.numeric(PET_fore[88,64,])) #1 month
+b_f<-c( as.numeric(ppt_fore_array[88,64,]) , as.numeric(PET_fore[88,64,])) #3 month
+c_f<-c( as.numeric(ppt_fore_array[88,64,]) , as.numeric(PET_fore[88,64,])) #6 month
+d_f<-c( as.numeric(ppt_fore_array[88,64,]) , as.numeric(PET_fore[88,64,])) #12 month
+
+#par(mfrow=c(4, 1))
+#plot.spei(a_f, main="SPEI_1")
+#plot.spei(b_f, main="SPEI_3")
+#plot.spei(c_f, main="SPEI_6")
+#plot.spei(d_f, main="SPEI_12")
+
+north_real <- a[1]
+north_fore <- c(a_f, b_f, c_f, d_f)
 
 
-a<-spei( as.numeric(ppt_real_array[94,69,]) - as.numeric(PET_real[94,69,]), 1, na.rm = TRUE) #1 month
-b<-spei( as.numeric(ppt_real_array[94,69,]) - as.numeric(PET_real[94,69,]), 3, na.rm = TRUE) #3 month
-c<-spei( as.numeric(ppt_real_array[94,69,]) - as.numeric(PET_real[94,69,]), 6, na.rm = TRUE) #6 month
-d<-spei( as.numeric(ppt_real_array[94,69,]) - as.numeric(PET_real[94,69,]), 12, na.rm = TRUE) #12 month
 
-par(mfrow=c(4, 1))
-plot.spei(a, main="SPEI_1")
-plot.spei(b, main="SPEI_3")
-plot.spei(c, main="SPEI_6")
-plot.spei(d, main="SPEI_12")
+#MALOPOLSKA
+which(abs(lon_real - 21) < 0.05)
+which(abs(lat_real - 50) < 0.05)
+#179, 129
+
+which(abs(lon_fore - 21) < 0.05)
+which(abs(lat_fore - 50) < 0.05)
+#166, 120
+
+a<-c( as.numeric(ppt_real_array[179,129,]) , as.numeric(PET_real[179,129,])) #1 month
+b<-c( as.numeric(ppt_real_array[179,129,]) , as.numeric(PET_real[179,129,])) #3 month
+c<-c( as.numeric(ppt_real_array[179,129,]) , as.numeric(PET_real[179,129,])) #6 month
+d<-c( as.numeric(ppt_real_array[179,129,]) , as.numeric(PET_real[179,129,])) #12 month
+
+#par(mfrow=c(4, 1))
+#plot.spei(a, main="SPEI_1")
+#plot.spei(b, main="SPEI_3")
+#plot.spei(c, main="SPEI_6")
+#plot.spei(d, main="SPEI_12")
+
+a_f<-c( as.numeric(ppt_fore_array[166,120,]) ,as.numeric(PET_fore[166,120,])) #1 month
+b_f<-c( as.numeric(ppt_fore_array[166,120,]) ,as.numeric(PET_fore[166,120,])) #3 month
+c_f<-c( as.numeric(ppt_fore_array[166,120,]) ,as.numeric(PET_fore[166,120,])) #6 month
+d_f<-c( as.numeric(ppt_fore_array[166,120,]) ,as.numeric(PET_fore[166,120,])) #12 month
+
+#par(mfrow=c(4, 1))
+#plot.spei(a_f, main="SPEI_1")
+#plot.spei(b_f, main="SPEI_3")
+#plot.spei(c_f, main="SPEI_6")
+#plot.spei(d_f, main="SPEI_12")
+
+south_real <- c(a, b, c, d)
+south_fore <- c(a_f, b_f, c_f, d_f)
 
 
 
-a_f<-spei( as.numeric(ppt_fore_array[94,69,]) - as.numeric(PET_fore[94,69,]), 1, na.rm = TRUE) #1 month
-b_f<-spei( as.numeric(ppt_fore_array[94,69,]) - as.numeric(PET_fore[94,69,]), 3, na.rm = TRUE) #3 month
-c_f<-spei( as.numeric(ppt_fore_array[94,69,]) - as.numeric(PET_fore[94,69,]), 6, na.rm = TRUE) #6 month
-d_f<-spei( as.numeric(ppt_fore_array[94,69,]) - as.numeric(PET_fore[94,69,]), 12, na.rm = TRUE) #12 month
 
-par(mfrow=c(4, 1))
-plot.spei(a_f, main="SPEI_1")
-plot.spei(b_f, main="SPEI_3")
-plot.spei(c_f, main="SPEI_6")
-plot.spei(d_f, main="SPEI_12")
 
-plot(pol, lwd=3, xlim=c(14, 24.3), ylim=c(48.2, 55), border = "black")
+
+#ma byc south i north rozroznialne indexem
+
+real_coord <- data.frame(north  = c(lon_real[95], lat_real[68]), south = c(lon_real[179], lat_real[129]))
+row.names(real_coord) <- c("lon", "lat")
+
+fore_coord <- data.frame(north  = c(lon_fore[88], lat_fore[64]), south = c(lon_fore[166], lat_fore[120]))
+row.names(fore_coord) <- c("lon", "lat")
+
+#
+
+real_ppt <- data.frame(north = as.numeric(ppt_real_array[95,68,]), south = as.numeric(ppt_real_array[179,129,]))
+real_PET <- data.frame(north = as.numeric(PET_real[95,68,]), south = as.numeric(PET_real[179,129,]))
+fore_ppt <- data.frame(north = as.numeric(ppt_fore_array[88,64,]), south = as.numeric(ppt_fore_array[166,120,])) 
+fore_PET <- data.frame(north = as.numeric(PET_fore[88,64,]), south = as.numeric(PET_fore[166,120,])) 
+
+
+
+#############################
+#north_coord <- data.frame(real  = c(lon_real[95], lat_real[68]), forecast = c(lon_fore[88], lat_fore[64]))
+#row.names(north_coord) <- c("lon", "lat")
+
+#north_real_ppt <- as.numeric(ppt_real_array[95,68,])
+#north_real_PET <- as.numeric(PET_real[95,68,])
+
+#north_fore_ppt <- as.numeric(ppt_fore_array[88,64,])
+#north_fore_PET <- as.numeric(PET_fore[88,64,])
+
+#south_coord <- data.frame(real  = c(lon_real[179], lat_real[129]), forecast = c(lon_fore[166], lat_fore[120]))
+#row.names(south_coord) <- c("lon", "lat")
+
+
+#south_real_ppt <- as.numeric(ppt_real_array[179,129,])
+#south_real_PET <- as.numeric(PET_real[179,129,])
+
+#south_fore_ppt <- as.numeric(ppt_fore_array[166,120,])
+#south_fore_PET <- as.numeric(PET_fore[166,120,])
+
+
+save(list = c("real_coord", "fore_coord", "local_data"), file = "manual_local1.RData")
+
+
+library(ggplot2)
+
+dd <- data.frame(time=rep(as.yearmon(time_real), 2), tmax=c(tmax_real_array[real_coord[1,1], real_coord[2,1],], tmax_fore_array[fore_coord[1,1], fore_coord[2,1],]), 
+                 dataset=c(rep.int(1, length(time_real)), rep.int(2, length(time_fore))))
+
+
+
+local_data <- data.frame(time=as.yearmon(time_real), 
+                          #north
+                          tmax_real1=tmax_real_array[real_coord[1,1], real_coord[2,1],], 
+                          tmax_fore1 =tmax_fore_array[fore_coord[1,1], fore_coord[2,1],],
+                          tmin_real1=tmin_real_array[real_coord[1,1], real_coord[2,1],], 
+                          tmin_fore1 =tmin_fore_array[fore_coord[1,1], fore_coord[2,1],],
+                          ppt_real1=ppt_real_array[real_coord[1,1], real_coord[2,1],], 
+                          ppt_fore1 =ppt_fore_array[fore_coord[1,1], fore_coord[2,1],], 
+                          PET_real1 = PET_real[real_coord[1,1], real_coord[2,1],],
+                          PET_fore1 = PET_fore[fore_coord[1,1], fore_coord[2,1],],
+                          #south
+                          tmax_real2=tmax_real_array[real_coord[1,2], real_coord[2,2],], 
+                          tmax_fore2 =tmax_fore_array[fore_coord[1,2], fore_coord[2,2],],
+                          tmin_real2=tmin_real_array[real_coord[1,2], real_coord[2,2],], 
+                          tmin_fore2 =tmin_fore_array[fore_coord[1,2], fore_coord[2,2],],
+                          ppt_real2=ppt_real_array[real_coord[1,2], real_coord[2,2],], 
+                          ppt_fore2 =ppt_fore_array[fore_coord[1,2], fore_coord[2,2],], 
+                          PET_real2 = PET_real[real_coord[1,2], real_coord[2,2],],
+                          PET_fore2 = PET_fore[fore_coord[1,2], fore_coord[2,2],])
+
+library(patchwork)
+
+p1<- ggplot(local_data[month(local_data$time) == 7,])+
+  geom_line(aes(x=seq(2006, 2021), y=tmax_real2), color="#4575b4", size=1)+
+geom_line(aes(x=seq(2006, 2021), y=tmax_fore2), color="#f2b103", size=1, alpha=0.4)+
+  scale_x_continuous(breaks=seq(2006, 2021, by=2))+
+  theme_classic() + 
+  labs(x="", y="Średnia miesięczna temperatura maksymalna [°C]", title="")
+
+p2 <- ggplot(local_data[month(local_data$time) == 7,])+
+  geom_line(aes(x=seq(2006, 2021), y=tmin_real2), color="#4575b4", size=1)+
+  geom_line(aes(x=seq(2006, 2021), y=tmin_fore2), color="#f2b103", size=1, alpha=0.4)+
+  scale_x_continuous(breaks=seq(2006, 2021, by=2))+
+  theme_classic() + 
+  labs(x="", y="Średnia miesięczna temperatura minimalne [°C]", title="")
+
+p3 <- ggplot(local_data[month(local_data$time) == 7,])+
+  geom_line(aes(x=seq(2006, 2021), y=ppt_real1), color="#4575b4", size=1)+
+  geom_line(aes(x=seq(2006, 2021), y=ppt_fore1), color="#f2b103", size=1, alpha=0.4)+
+  scale_x_continuous(breaks=seq(2006, 2021, by=2))+
+  theme_classic() + 
+  labs(x="", y="Miesięczna suma opadów [mm]", title="")
+
+p1 + p2 + p3
+
+
+
+
+
+
+
+
+
+
+cuts<-seq(-3,3,0.5)
+pal <- brewer.pal(13,'RdYlBu')
+
+plot(spei_rasters[1,1][[1]][[1]], breaks=cuts, col = pal)
+
+plot(pol, lwd=3, xlim=c(14, 24.3), ylim=c(48.2, 55), border = "black", add=TRUE)
 plot(both, add=TRUE, lwd=3, xlim=c(14, 24.3), ylim=c(48.2, 55), border = "black")
-points(lon_real[94], lat_real[69])
+#points(lon_real[94], lat_real[69])
+
 points(lon_fore[88], lat_fore[64])
+points(lon_fore[64], lat_fore[88], col="blue")
 
 
 
@@ -716,8 +867,26 @@ which(abs(r1lon[1,] - 17.5) < 0.05)
 which(abs(r1lat - 52.5) < 0.05)
 
 
-spei_rasters[1,2][[1]][[1]][88, 64]
-SPEI1_fore[, , 19]
+#fore
+#lat, lon
+spei_rasters[1,2][[1]][[1]][64, 88]
+#lon, lat
+SPEI1_fore[88, 64, 19]
 #lon64, lat88
-spei_rasters[1,1][[1]][[1]][88, 64]
-SPEI1_real[69, 94,19]
+
+#real
+spei_rasters[1,1][[1]][[1]][64, 88]
+
+
+#point
+vec_ppt <- 0
+for (i in seq(1, 15))
+{
+  vec_ppt <- append (vec_ppt, ppt_rasters[1,2][[1]][[i]][64, 88])
+}
+
+a<-spei( as.numeric(ppt_fore_array[64,88,]) - as.numeric(PET_fore[i,j,]), 1, na.rm = TRUE) #1 month
+SPEI1_fore[i,j,]<-as.vector(a$fitted)	
+
+
+#############################################################################################################

@@ -63,6 +63,13 @@ both <- st_union(south, north)
 pol <- st_read("Wojewodztwa/Województwa.shp")
 #Projected CRS: ETRS89 / Poland CS92
 
+#s1 <- subset(pol, JPT_NAZWA_=="wielkopolskie")
+#s2 = subset(pol, JPT_NAZWA_=="kujawsko-pomorskie")
+
+#s <- st_union(s1, s2)
+#plot(s)
+#pol
+
 pol <- st_transform(pol, crs = 4326)
 #Geodetic CRS:  WGS 84
 
