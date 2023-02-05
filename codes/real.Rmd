@@ -20,7 +20,6 @@ source_rmd = function(file, ...) {
 
 ```{r}
 source_rmd("../codes/shapefiles.Rmd")
-#print("running kod_shapefiles - success")
 ```
 
 ##########################################################################################################################################
@@ -127,12 +126,6 @@ cuts<-seq(13,35,2)
 
 levelplot(z ~ lon * lat, data=grid_real, at=cuts, pretty=T, col.regions=(rev(brewer.pal(12,"RdBu"))),aspect=range_real_lat/range_real_lon, main = "Real maximum temperature - July 2006")
 
-
-#tmax_real_raster<-rasterFromXYZ(grid_real,crs=4326)
-
-#pal <- rev(brewer.pal(12,"RdBu"))
-#plot(tmax_real_raster,main=time_real[7],col=pal,breaks=cuts)
-#plot(both,add=TRUE,lwd=2)
 
 ```
 
@@ -316,11 +309,6 @@ levelplot(z ~ lon * lat, data=grid_real_pet, at=cuts, pretty=T, col.regions=(rev
 
 ```
 
-```{r}
-library(beepr)
-beep(6)
-```
-
 SPEI
 ```{r}
 SPEI1_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
@@ -332,7 +320,6 @@ for (i in 1:tmax_real_dim[1]){
 		SPEI1_real[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
 
 SPEI3_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
 
@@ -343,7 +330,6 @@ for (i in 1:tmax_real_dim[1]){
 		SPEI3_real[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
 
 SPEI6_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
 
@@ -354,7 +340,6 @@ for (i in 1:tmax_real_dim[1]){
 		SPEI6_real[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
 
 
 SPEI12_real <- array(rep(NA, prod(tmax_real_dim)), dim = tmax_real_dim)
@@ -366,15 +351,12 @@ for (i in 1:tmax_real_dim[1]){
 		SPEI12_real[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
-
 
 ```
 
 Visualization
 ```{r}
-#range(na.omit(as.numeric(SPEI_real[,,7])))
-pal <- colorRampPalette(c("red","blue"))
+pal <- colorRampPalette(c("red","green"))
 cuts<-seq(-3,3,0.5)
 
 #indexes of every july
@@ -391,7 +373,7 @@ for (i in july_real)
   
   plot(spei6_real_raster,main= paste("6-month SPEI based on real data - ", time_real[i]),col=pal(12),breaks=cuts)
   plot(both,add=TRUE,lwd=2)
-  
+  points(real_coord[1,1], real_coord[2,1])
   ## crop and mask
   #ex <- extent(as_Spatial(both))
   #spei_real_r_cropped <- crop(spei_real_raster, ex)
@@ -401,13 +383,5 @@ for (i in july_real)
   #plot(as_Spatial(both), add=TRUE, lwd=2)
 
 }
-
-```
-
-
-
-
-
-```{r}
 
 ```

@@ -24,7 +24,7 @@ source_rmd = function(file, ...) {
 RUNNING NECESSARY FILES (kod_real.Rmd, kod_shapefiles.Rmd, setup.R)
 ```{r}
 source_rmd("../codes/real.Rmd")
-#print("running kod_real - success")
+
 ```
 LOADING SAVED WORKSPACE
 ```{r}
@@ -444,7 +444,6 @@ for (i in 1:tmax_fore_dim[1]){
 		SPEI1_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
 
 SPEI3_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 
@@ -455,7 +454,6 @@ for (i in 1:tmax_fore_dim[1]){
 		SPEI3_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
 
 SPEI6_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
 
@@ -466,7 +464,6 @@ for (i in 1:tmax_fore_dim[1]){
 		SPEI6_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
 
 
 SPEI12_fore <- array(rep(NA, prod(tmax_fore_dim)), dim = tmax_fore_dim)
@@ -478,7 +475,6 @@ for (i in 1:tmax_fore_dim[1]){
 		SPEI12_fore[i,j,]<-as.vector(a$fitted)		
 	}
 }
-beep(3)
 
 
 ```

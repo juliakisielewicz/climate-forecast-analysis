@@ -82,6 +82,3 @@ pol <- st_union(pol)
 
 #plot(south)
 ```
-
-```{r}
-```

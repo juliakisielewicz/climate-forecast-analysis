@@ -103,25 +103,18 @@ for (i in seq(5,7)) {
   corr_s <- corLocal(tmax_rasters$real[12][[1]] , tmax_rasters$forecast[12][[1]], method="spearman", test=TRUE)
   corrs_tmax_s <- append(corrs_tmax_s, corr_s)
 #}
-beep(6)
+
 
 tmax <- c(corrs_tmax_p, corrs_tmax_s)
 correlation_tmax <- data.frame(matrix(tmax, nrow=12, ncol=2))
 colnames(correlation_tmax) <- c("pearson", "spearman")
 rownames(correlation_tmax) <- seq(1,12)
 
-#load("manual_tmp1.RData")
-#load("manual_real_fore_ras_full.RData")
-
 setwd("D:/AGH/INZ/data")
 library(raster)
 load("manual_tmp_complete_tmax.RData")
 save(list=c("tmax_rasters", "tmin_rasters", "ppt_rasters", "correlation_spei", "corrs_tmax_p", "corrs_tmax_s", "correlation_tmax"), file="manual_tmp_complete_tmax.RData")
 
-
-
-
-#save(list=c("both", "north", "south", "pol", "july", "lat_fore", "lon_fore", "lat_real", "lon_real", "PET_fore", "PET_real", "ppt_fore_array", "ppt_real_array", "SPEI1_fore", "SPEI1_real", #"SPEI3_fore", "SPEI3_real", "SPEI6_fore", "SPEI6_real", "SPEI12_fore", "SPEI12_real", "time_fore", "time_real", "tmax_fore_array", "tmax_real_array", "tmin_fore_array", "tmin_real_array", #"correlation_spei", "corrs_tmax_p", "corrs_tmax_s"), file="manual_tmp1.RData")
 ```
 
 TMIN
@@ -143,19 +136,6 @@ tmin <- c(corrs_tmin_p, corrs_tmin_s)
 correlation_tmin <- data.frame(matrix(tmin, nrow=12, ncol=2))
 colnames(correlation_tmin) <- c("pearson", "spearman")
 rownames(correlation_tmin) <- seq(1,12)
-
-
-
-setwd("D:/AGH/INZ/data")
-library(raster)
-load("manual_tmp_complete_tmax.RData")
-save(list=c("tmax_rasters", "tmin_rasters", "ppt_rasters", "correlation_spei", "corrs_tmax_p", "corrs_tmax_s", "correlation_tmax", "corrs_tmin_p",), file="manual_tmp_complete_tmax.RData")
-
-save(list=c("tmin_rasters"), file="manual_tmp_tmin.RData")
-load("manual_tmp_tmin.RData")
-
-load("manual_tmp_corrs_tmin_s.RData")
-save(list=c("corrs_tmin_s"), file="manual_tmp_corrs_tmin_s2.RData")
 
 ```
 
