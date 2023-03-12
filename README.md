@@ -1,7 +1,7 @@
 # Analysis of high-resolution future climate projections in the context of drought potential in selected regions of Poland. 
 
 
-This repo contains my BSc Thesis written at the end of the study of Geoinformatics at Geology, Geophysics and Enviromental Protection Faculty at AGH University of Science and Technology in Cracow, Poland. 
+This repo contains my BSc Thesis written at the end of the study of Geoinformatics at the Faculty of Geology, Geophysics and Enviromental Protection at AGH University of Science and Technology in Cracow, Poland. 
 
 ## Web-app presenting results of the analysis
 
